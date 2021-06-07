@@ -1,0 +1,33 @@
+# Ignore binaries, packaged files and temp files
+*.py[cod]
+__pycache__
+*~
+*.egg-info
+dist
+build
+
+# Ignore all dotfiles (e.g. .classpath, .*project) but not .git* and .travis.yml
+.*
+!.git*
+!.travis.yml
+!.dockerignore
+
+# Ignore results
+*.pickle
+
+# Ignore doc build files
+doc/build
+doc/source/apidoc
+
+# Ignore plot files
+*.pdf
+
+# Ignore patches
+*.patch
+
+# Workloads
+resources/workloads
+
+# Local dev folders
+notes
+secrets
