@@ -15,6 +15,7 @@ __all__ = [
        'LeaveCopyEverywhere',
        'LeaveCopyEverywherePacketLevel',
        'LeaveCopyDown',
+       'LeaveCopyDownPacketLevel',
        'ProbCache',
        'CacheLessForMore',
        'RandomBernoulli',
@@ -151,6 +152,7 @@ class LeaveCopyEverywherePacketLevel(Strategy):
 
         elif pkt_type == 'Data':
             if node == receiver:
+                print('LCE_PKT_LEVEL Received')
                 self.controller.end_flow_session(flow, log)
             else:
                 if self.view.has_cache(node):
@@ -162,6 +164,7 @@ class LeaveCopyEverywherePacketLevel(Strategy):
                 self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Data', 'log': log})
         else:
             raise ValueError('Invalid packet type')
+
 
 @register_strategy('LCE')
 class LeaveCopyEverywhere(Strategy):
@@ -188,6 +191,7 @@ class LeaveCopyEverywhere(Strategy):
                 if self.controller.get_content(v):
                     serving_node = v
                     break
+        else:
             # No cache hits, get content from source
             self.controller.get_content(v)
             serving_node = v
@@ -198,6 +202,7 @@ class LeaveCopyEverywhere(Strategy):
             if self.view.has_cache(v):
                 # insert content
                 self.controller.put_content(v)
+        print('LCE Received')
         self.controller.end_session()
 
 
@@ -247,7 +252,75 @@ class LeaveCopyDown(Strategy):
             if not copied and v != receiver and self.view.has_cache(v):
                 self.controller.put_content(v)
                 copied = True
+        print('LCD Received')
         self.controller.end_session()
+
+
+@register_strategy('LCD_PKT_LEVEL')
+class LeaveCopyDownPacketLevel (Strategy):
+    """Leave Copy Down (LCD) strategy.
+
+        According to this strategy, one copy of a content is replicated only in
+        the caching node you hop away from the serving node in the direction of
+        the receiver. This strategy is described in [2]_.
+
+        Rereferences
+        ------------
+        ..[1] N. Laoutaris, H. Che, i. Stavrakakis, The LCD interconnection of LRU
+              caches and its analysis.
+              Available: http://cs-people.bu.edu/nlaout/analysis_PEVA.pdf
+        """
+
+    @inheritdoc(Strategy)
+    def __init__(self, view, controller, **kwargs):
+        super(LeaveCopyDownPacketLevel, self).__init__(view, controller)
+
+    @inheritdoc(Strategy)
+    def process_event(self, time, receiver, content, node, flow, pkt_type, log):
+        # get all required data
+        # Route requests to original source and queries cache on the path
+        if pkt_type == 'Request':
+            if node == receiver:
+                # print('start session flag', self.view.get_lcd_flow_copied_flag())
+                self.controller.start_flow_session(time, receiver, content, flow, log)
+            source = self.view.content_source(content)
+            if self.view.has_cache(node) or node == source:
+                if self.controller.get_content_flow(node, content, flow, log):
+                    path = self.view.shortest_path(node, receiver)
+                    delay = self.view.link_delay(node, path[1])
+                    t_event = time + delay
+                    self.controller.forward_request_hop_flow(node, path[1], flow, log)
+                    # self.controller.set_lcd_flow_copied_flag(False)
+                    # print('Request to Data, flag', self.view.get_lcd_flow_copied_flag())
+                    self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Data', 'log': log})
+                    return
+            path = self.view.shortest_path(node, source)
+            delay = self.view.link_delay(node, path[1])
+            t_event = time + delay
+            self.controller.forward_request_hop_flow(node, path[1], flow ,log)
+            # print('Request, flag', self.view.get_lcd_flow_copied_flag())
+            self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Request', 'log': log})
+
+        # Leave a copy of the content only in the cache one level down the hit
+        # caching node
+        elif pkt_type == 'Data':
+            if node == receiver:
+                print('LCD_PKT_LEVEL Receieved')
+                self.controller.set_lcd_flow_copied_flag(False)
+                self.controller.end_flow_session(flow, log)
+            else:
+                if self.view.has_cache(node) and self.view.get_lcd_flow_copied_flag() == False:
+                    self.controller.put_content_flow(node, content, flow)
+                    self.controller.set_lcd_flow_copied_flag(True)
+                    # print('set to true !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                path = self.view.shortest_path(node, receiver)
+                self.controller.forward_content_hop_flow(node, path[1], flow, log)
+                delay = self.view.link_delay(node, path[1])
+                t_event = time + delay
+                # print('Data, flag', self.view.get_lcd_flow_copied_flag())
+                self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Data', 'log': log})
+        else:
+            raise ValueError('Invalid packet type')
 
 
 @register_strategy('PROB_CACHE')

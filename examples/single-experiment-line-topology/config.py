@@ -48,11 +48,11 @@ experiment['topology']['delay'] = 10
 # Set workload
 experiment['workload'] = {
          'name':       'STATIONARY_PACKET_LEVEL',
-         'n_contents': 10 ** 4,
+         'n_contents': 10 ** 5,
          'n_warmup':   10 ** 2,
          'n_measured': 4 * 10 ** 2,
          'alpha':      1.0,
-         'rate':       1
+         'rate':       12
                        }
 
 # Set cache placement
@@ -63,7 +63,7 @@ experiment['cache_placement']['network_cache'] = 0.05
 experiment['content_placement']['name'] = 'UNIFORM'
 
 # Set cache replacement policy
-experiment['cache_policy']['name'] = 'LRU'
+experiment['cache_policy']['name'] = 'NULL'
 
 # Set caching meta-policy
 experiment['strategy']['name'] = 'LCE_PKT_LEVEL'

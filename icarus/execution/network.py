@@ -329,6 +329,15 @@ class NetworkView(object):
         if node in self.model.cache:
             return self.model.cache[node].dump()
 
+    def get_lcd_flow_copied_flag(self):
+        """Return the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flag : True for already copied
+               False for not copied yet
+        """
+        return self.model.lcd_pkt_level_copied_flag
 
 class NetworkModel(object):
     """Models the internal state of the network.
@@ -351,6 +360,9 @@ class NetworkModel(object):
         shortest_path : dict of dict, optional
             The all-pair shortest paths of the network
         """
+        # LCD packet level falg indicating content copied or not
+        self.lcd_pkt_level_copied_flag = False
+
         # Filter inputs
         if not isinstance(topology, fnss.Topology):
             raise ValueError('The topology argument must be an instance of '
@@ -372,7 +384,7 @@ class NetworkModel(object):
         # Dictionary of link types (internal/external)
         self.link_type = nx.get_edge_attributes(topology, 'type')
         self.link_delay = fnss.get_delays(topology)
-        # Instead of this manual assignment, I could have converted the
+        # [Instead of this manual assignment, I could have converted the
         # topology to directed before extracting type and link delay but that
         # requires a deep copy of the topology that can take long time if
         # many content source mappings are included in the topology
@@ -425,6 +437,7 @@ class NetworkModel(object):
         # A priority queue of events
         self.eventQ = []
 
+
 class NetworkController(object):
     """Network controller
 
@@ -476,7 +489,6 @@ class NetworkController(object):
     def detach_collector(self):
         """Detach the data collector."""
         self.collector = None
-
 
     def start_session(self, timestamp, receiver, content, log):
         """Instruct the controller to start a new session (i.e. the retrieval
@@ -994,3 +1006,14 @@ class NetworkController(object):
         """
         if node in self.model.local_cache:
             return self.model.local_cache[node].put(self.session['content'])
+
+    def set_lcd_flow_copied_flag(self, flag):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.lcd_pkt_level_copied_flag = flag
+        # print('model, set flag', self.model.lcd_pkt_level_copied_flag)
