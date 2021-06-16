@@ -43,7 +43,7 @@ DATA_COLLECTORS = ['CACHE_HIT_RATIO', 'LATENCY']
 # alpha values must be positive. The greater the value the more skewed is the
 # content popularity distribution
 # Note: to generate these alpha values, numpy.arange could also be used, but it
-# is not recommended because generated numbers may be not those desired.
+# is not recommended because generated numbers may be not those desired.:q
 # E.g. arange may return 0.799999999999 instead of 0.8.
 # This would give problems while trying to plot the results because if for
 # example I wanted to filter experiment with alpha=0.8, experiments with
