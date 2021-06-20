@@ -467,7 +467,8 @@ class NetworkController(object):
         """
         self.model.eventQ.insert(0,event)
         # Sort events in the eventQ by "time of event" (t_event)
-        sorted(self.model.eventQ, key = lambda i: i['t_event'])
+        #self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
+        self.model.eventQ.sort(key=lambda i:i['t_event'])
 
     def pop_next_event(self):
         """
