@@ -49,8 +49,8 @@ experiment['topology']['delay'] = 10
 experiment['workload'] = {
          'name':       'STATIONARY_PACKET_LEVEL',
          'n_contents': 10 ** 5,
-         'n_warmup':   10 ** 2,
-         'n_measured': 4 * 10 ** 2,
+         'n_warmup':   10 ** 5,
+         'n_measured': 4 * 10 ** 5,
          'alpha':      1.0,
          'rate':       12
                        }
@@ -66,7 +66,7 @@ experiment['content_placement']['name'] = 'UNIFORM'
 experiment['cache_policy']['name'] = 'NULL'
 
 # Set caching meta-policy
-experiment['strategy']['name'] = 'LCE_PKT_LEVEL'
+experiment['strategy']['name'] = 'LCD_PKT_LEVEL'
 
 # Description of the experiment
 experiment['desc'] = "Line topology with 10 nodes"

@@ -72,7 +72,7 @@ def plot_cache_hits_vs_cache_size(resultset, topology, alpha, cache_size_range, 
     desc['title'] = 'Cache hit ratio: T=%s A=%s' % (topology, alpha)
     desc['xlabel'] = u'Cache to population ratio'
     desc['ylabel'] = 'Cache hit ratio'
-    desc['xscale'] = 'log'
+    # desc['xscale'] = 'log'
     desc['xparam'] = ('cache_placement', 'network_cache')
     desc['xvals'] = cache_size_range
     desc['filter'] = {'topology': {'name': topology},
@@ -96,7 +96,7 @@ def plot_latency_vs_cache_size(resultset, topology, alpha, cache_size_range, str
     desc['title'] = 'Latency: T=%s A=%s' % (topology, alpha)
     desc['xlabel'] = 'Cache to population ratio'
     desc['ylabel'] = 'Latency'
-    desc['xscale'] = 'log'
+    # desc['xscale'] = 'log'
     desc['xparam'] = ('cache_placement', 'network_cache')
     desc['xvals'] = cache_size_range
     desc['filter'] = {'topology': {'name': topology},

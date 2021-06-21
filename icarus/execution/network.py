@@ -329,7 +329,7 @@ class NetworkView(object):
         if node in self.model.cache:
             return self.model.cache[node].dump()
 
-    def get_lcd_flow_copied_flag(self):
+    def get_lcd_flow_copied_flag(self, flow):
         """Return the flag indicating copied or not in LCD
 
         Parameters
@@ -337,7 +337,7 @@ class NetworkView(object):
         flag : True for already copied
                False for not copied yet
         """
-        return self.model.lcd_pkt_level_copied_flag
+        return self.model.lcd_pkt_level_copied_flag[flow]
 
 class NetworkModel(object):
     """Models the internal state of the network.
@@ -360,8 +360,7 @@ class NetworkModel(object):
         shortest_path : dict of dict, optional
             The all-pair shortest paths of the network
         """
-        # LCD packet level falg indicating content copied or not
-        self.lcd_pkt_level_copied_flag = False
+
 
         # Filter inputs
         if not isinstance(topology, fnss.Topology):
@@ -436,6 +435,9 @@ class NetworkModel(object):
 
         # A priority queue of events
         self.eventQ = []
+
+        # LCD packet level flag indicating content copied or not
+        self.lcd_pkt_level_copied_flag = {}
 
 
 class NetworkController(object):
@@ -1008,13 +1010,15 @@ class NetworkController(object):
         if node in self.model.local_cache:
             return self.model.local_cache[node].put(self.session['content'])
 
-    def set_lcd_flow_copied_flag(self, flag):
+    def set_lcd_flow_copied_flag(self, flow, flag):
         """Set the flag indicating copied or not in LCD
 
         Parameters
         ----------
+        flow: Indicating the flow number
+
         flag : True for already copied
                False for not copied yet
         """
-        self.model.lcd_pkt_level_copied_flag = flag
+        self.model.lcd_pkt_level_copied_flag[flow] = flag
         # print('model, set flag', self.model.lcd_pkt_level_copied_flag)

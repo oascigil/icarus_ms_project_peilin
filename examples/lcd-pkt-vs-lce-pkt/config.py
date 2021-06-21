@@ -52,7 +52,7 @@ default['workload'] = {'name':       'STATIONARY_PACKET_LEVEL',
 
 # Specify cache placement
 default['cache_placement']['name'] = 'UNIFORM'
-NETWORK_CACHE = [0.004, 0.01, 0.05]
+NETWORK_CACHE = [0.004, 0.01, 0.03, 0.05]
 
 # Specify content placement
 default['content_placement']['name'] = 'UNIFORM'
@@ -66,7 +66,7 @@ default['topology']['n'] = 10
 default['topology']['delay'] = 10
 
 # Create experiments multiplexing all desired parameters
-for strategy in ['LCE_PKT_LEVEL', 'LCD_PKT_LEVEL']:
+for strategy in ['LCD_PKT_LEVEL', 'LCE__PKT_LEVEL']:
     for network_cache in NETWORK_CACHE:
         experiment = copy.deepcopy(default)
         experiment['strategy']['name'] = strategy

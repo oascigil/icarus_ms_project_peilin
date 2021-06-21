@@ -101,6 +101,7 @@ class StationaryPacketLevelWorkload(object):
         self.view = None
         self.controller = None
         self.beta = beta
+        print('Stationary-pkr-level, enter init')
         if beta != 0:
             degree = nx.degree(self.topology)
             self.receivers = sorted(self.receivers, key=lambda x: degree[iter(topology.adj[x]).next()], reverse=True)
@@ -109,8 +110,10 @@ class StationaryPacketLevelWorkload(object):
     def __iter__(self):
         flow_counter = 0
         t_next_flow = 0.0
+        print('Stationary-pkt-level, enter iter')
 
         while ( (flow_counter < self.n_warmup + self.n_measured) or len(self.view.eventQ())>0 ):
+            print('Stationary-pkt-level, enter iter while')
             t_next_flow += (random.expovariate(self.rate))
             event = self.view.peek_next_event()
             while (event is not  None) and (event['t_event'] < t_next_flow):
@@ -131,6 +134,7 @@ class StationaryPacketLevelWorkload(object):
             event = {'receiver': receiver, 'content': content, 'node': receiver, 'flow': flow_counter, 'pkt_type': 'Request', 'log': log}
             yield (t_next_flow, event)
             flow_counter += 1
+            print('flow counter: ', flow_counter)
         return
 
 @register_workload('STATIONARY')
@@ -184,6 +188,7 @@ class StationaryWorkload(object):
     """
     def __init__(self, topology, n_contents, alpha, beta=0, rate=1.0,
                     n_warmup=10 ** 5, n_measured=4 * 10 ** 5, seed=None, **kwargs):
+        print('Stationary, enter init')
         if alpha < 0:
             raise ValueError('alpha must be positive')
         if beta < 0:
@@ -205,9 +210,11 @@ class StationaryWorkload(object):
             self.receiver_dist = TruncatedZipfDist(beta, len(self.receivers))
 
     def __iter__(self):
+        print('Stationary, enter iter')
         req_counter = 0
         t_event = 0.0
         while req_counter < self.n_warmup + self.n_measured:
+            print('Stationary, enter iter while')
             t_event += (random.expovariate(self.rate))
             if self.beta == 0:
                 receiver = random.choice(self.receivers)
