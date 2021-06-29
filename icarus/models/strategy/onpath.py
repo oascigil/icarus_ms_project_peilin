@@ -17,6 +17,7 @@ __all__ = [
        'LeaveCopyDown',
        'LeaveCopyDownPacketLevel',
        'ProbCache',
+       'ProbCachePacketLevel',
        'CacheLessForMore',
        'RandomBernoulli',
        'RandomChoice',
@@ -138,7 +139,7 @@ class LeaveCopyEverywherePacketLevel(Strategy):
             source = self.view.content_source(content)
             if self.view.has_cache(node) or node == source:
                 if self.controller.get_content_flow(node, content, flow, log):
-                    print('flow:', flow, ', cache hit')
+                    # print('flow:', flow, ', cache hit')
                     path = self.view.shortest_path(node, receiver)
                     delay = self.view.link_delay(node, path[1])
                     t_event = time + delay
@@ -149,16 +150,15 @@ class LeaveCopyEverywherePacketLevel(Strategy):
             delay = self.view.link_delay(node, path[1])
             t_event = time + delay
             self.controller.forward_request_hop_flow(node, path[1], flow, log)
-            print('flow:', flow, ', LCE_PKT_LEVEL request')
+            # print('flow:', flow, ', LCE_PKT_LEVEL request')
             self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Request', 'log': log} )
-
         elif pkt_type == 'Data':
             if node == receiver:
-                print('flow:', flow, ', LCE_PKT_LEVEL Received')
+                # print('flow:', flow, ', LCE_PKT_LEVEL Received')
                 self.controller.end_flow_session(flow, log)
             else:
                 if self.view.has_cache(node):
-                    print('flow:', flow, ', LCE_PKT_LEVEL put content')
+                    # print('flow:', flow, ', LCE_PKT_LEVEL put content')
                     self.controller.put_content_flow(node, content, flow)
                 path = self.view.shortest_path(node, receiver)
                 self.controller.forward_content_hop_flow(node, path[1], flow, log)
@@ -183,7 +183,7 @@ class LeaveCopyEverywhere(Strategy):
 
     @inheritdoc(Strategy)
     def process_event(self, time, receiver, content, log):
-        print('LCE process event')
+        # print('LCE process event')
         # get all required data
         source = self.view.content_source(content)
         path = self.view.shortest_path(receiver, source)
@@ -193,13 +193,13 @@ class LeaveCopyEverywhere(Strategy):
             self.controller.forward_request_hop(u, v)
             if self.view.has_cache(v):
                 if self.controller.get_content(v):
-                    print('LCE cache hit')
+                    # print('LCE cache hit')
                     serving_node = v
                     break
         else:
             # No cache hits, get content from source
             self.controller.get_content(v)
-            print('LCE find source')
+            # print('LCE find source')
             serving_node = v
         # Return content
         path = list(reversed(self.view.shortest_path(receiver, serving_node)))
@@ -207,7 +207,7 @@ class LeaveCopyEverywhere(Strategy):
             self.controller.forward_content_hop(u, v)
             if self.view.has_cache(v):
                 # insert content
-                print('LCE copy content')
+                # print('LCE copy content')
                 self.controller.put_content(v)
         print('LCE Received')
         self.controller.end_session()
@@ -234,7 +234,7 @@ class LeaveCopyDown(Strategy):
 
     @inheritdoc(Strategy)
     def process_event(self, time, receiver, content, log):
-        print('LCD process_event')
+        # print('LCD process_event')
         # get all required data
         source = self.view.content_source(content)
         path = self.view.shortest_path(receiver, source)
@@ -244,13 +244,13 @@ class LeaveCopyDown(Strategy):
             self.controller.forward_request_hop(u, v)
             if self.view.has_cache(v):
                 if self.controller.get_content(v):
-                    print('LCD cache hit')
+                    # print('LCD cache hit')
                     serving_node = v
                     break
         else:
             # No cache hits, get content from source
             self.controller.get_content(v)
-            print('LCD find source')
+            # print('LCD find source')
             serving_node = v
         # Return content
         path = list(reversed(self.view.shortest_path(receiver, serving_node)))
@@ -261,7 +261,7 @@ class LeaveCopyDown(Strategy):
             self.controller.forward_content_hop(u, v)
             if not copied and v != receiver and self.view.has_cache(v):
                 self.controller.put_content(v)
-                print('LCD copy content')
+                # print('LCD copy content')
                 copied = True
         print('LCD Received')
         self.controller.end_session()
@@ -293,7 +293,7 @@ class LeaveCopyDownPacketLevel (Strategy):
         if pkt_type == 'Request':
             if node == receiver:
                 self.controller.set_lcd_flow_copied_flag(flow, False)
-                print('flow:', flow, ', start session flag', self.view.get_lcd_flow_copied_flag(flow))
+                # print('flow:', flow, ', start session flag', self.view.get_lcd_flow_copied_flag(flow))
                 self.controller.start_flow_session(time, receiver, content, flow, log)
             source = self.view.content_source(content)
             if self.view.has_cache(node) or node == source:
@@ -303,33 +303,33 @@ class LeaveCopyDownPacketLevel (Strategy):
                     t_event = time + delay
                     self.controller.forward_request_hop_flow(node, path[1], flow, log)
                     # self.controller.set_lcd_flow_copied_flag(flow, False)
-                    print('flow:', flow, ', cache hit, flag', self.view.get_lcd_flow_copied_flag(flow))
+                    # print('flow:', flow, ', cache hit, flag', self.view.get_lcd_flow_copied_flag(flow))
                     self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Data', 'log': log})
                     return
             path = self.view.shortest_path(node, source)
             delay = self.view.link_delay(node, path[1])
             t_event = time + delay
             self.controller.forward_request_hop_flow(node, path[1], flow ,log)
-            print('flow:', flow, ', Request, flag', self.view.get_lcd_flow_copied_flag(flow))
+            # print('flow:', flow, ', Request, flag', self.view.get_lcd_flow_copied_flag(flow))
             self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Request', 'log': log})
 
         # Leave a copy of the content only in the cache one level down the hit
         # caching node
         elif pkt_type == 'Data':
             if node == receiver:
-                print('flow:', flow, ', LCD_PKT_LEVEL Received')
+                # print('flow:', flow, ', LCD_PKT_LEVEL Received')
                 self.controller.set_lcd_flow_copied_flag(flow, False)
                 self.controller.end_flow_session(flow, log)
             else:
                 if self.view.has_cache(node) and self.view.get_lcd_flow_copied_flag(flow) == False:
                     self.controller.put_content_flow(node, content, flow)
                     self.controller.set_lcd_flow_copied_flag(flow, True)
-                    print('flow:', flow, ', set to true !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    # print('flow:', flow, ', set to true !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
                 path = self.view.shortest_path(node, receiver)
                 self.controller.forward_content_hop_flow(node, path[1], flow, log)
                 delay = self.view.link_delay(node, path[1])
                 t_event = time + delay
-                print('flow:', flow, ', Data, flag', self.view.get_lcd_flow_copied_flag(flow))
+                # print('flow:', flow, ', Data, flag', self.view.get_lcd_flow_copied_flag(flow))
                 self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Data', 'log': log})
         else:
             raise ValueError('Invalid packet type')
@@ -403,6 +403,112 @@ class ProbCache(Strategy):
                 if random.random() < prob_cache:
                     self.controller.put_content(v)
         self.controller.end_session()
+
+
+@register_strategy('PROB_CACHE_PKT_LEVEL')
+class ProbCachePacketLevel(Strategy):
+    """ProbCache strategy [3]_
+
+    This strategy caches content objects probabilistically on a path with a
+    probability depending on various factors, including distance from source
+    and destination and caching space available on the path.
+
+    This strategy was originally proposed in [2]_ and extended in [3]_. This
+    class implements the extended version described in [3]_. In the extended
+    version of ProbCache the :math`x/c` factor of the ProbCache equation is
+    raised to the power of :math`c`.
+
+    References
+    ----------
+    ..[2] I. Psaras, W. Chai, G. Pavlou, Probabilistic In-Network Caching for
+          Information-Centric Networks, in Proc. of ACM SIGCOMM ICN '12
+          Available: http://www.ee.ucl.ac.uk/~uceeips/prob-cache-icn-sigcomm12.pdf
+    ..[3] I. Psaras, W. Chai, G. Pavlou, In-Network Cache Management and
+          Resource Allocation for Information-Centric Networks, IEEE
+          Transactions on Parallel and Distributed Systems, 22 May 2014
+          Available: http://doi.ieeecomputersociety.org/10.1109/TPDS.2013.304
+    """
+
+    @inheritdoc(Strategy)
+    def __init__(self, view, controller, t_tw=10):
+        super(ProbCachePacketLevel, self).__init__(view, controller)
+        self.t_tw = t_tw
+        self.cache_size = view.cache_nodes(size=True)
+
+    @inheritdoc(Strategy)
+    def process_event(self, time, receiver, content, node, flow, pkt_type, log):
+        print('ProbCache_PKT_LEVEL process_event')
+        # get all required data
+        # Route requests to original source and queries cache on the path
+        if pkt_type == 'Request':
+            if node == receiver:
+                print('flow:', flow, ', ProbCache_PKT_LEVEL start session')
+                self.controller.start_flow_session(time, receiver, content, flow, log)
+                self.controller.start_probcache_c(flow)
+                print('flow:', flow, 'c:', self.view.get_probcache_c(flow))
+                self.controller.start_probcache_N(flow)
+                print('flow:', flow, 'N:', self.view.get_probcache_N(flow))
+            source = self.view.content_source(content)
+            if self.view.has_cache(node) or node == source:
+                if self.controller.get_content_flow(node, content, flow, log):
+                    path = self.view.shortest_path(node, receiver)
+                    delay = self.view.link_delay(node, path[1])
+                    t_event = time + delay
+                    self.controller.forward_request_hop_flow(node, path[1], flow, log)
+                    if self.view.has_cache(node):
+                        self.controller.add_probcache_c(flow)
+                    self.controller.start_probcache_x(flow)
+                    print('flow:', flow, ', cache hit')
+                    self.controller.add_event( {'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow,
+                         'pkt_type': 'Data', 'log': log})
+                    return
+            path = self.view.shortest_path(node, source)
+            delay = self.view.link_delay(node, path[1])
+            t_event = time + delay
+            self.controller.forward_request_hop_flow(node, path[1], flow, log)
+            if self.view.has_cache(node):
+                self.controller.add_probcache_c(flow)
+                print('flow:', flow, 'c', self.view.get_probcache_c(flow))
+            if path[1] in self.cache_size:
+                print('flow:', flow, 'path[1]:', path[1], 'add N', self.cache_size[path[1]])
+                self.controller.add_probcache_N(flow, self.cache_size[path[1]])
+                print('flow:', flow, 'N', self.view.get_probcache_N(flow))
+            print('flow:', flow, ', Request')
+            self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow,
+                 'pkt_type': 'Request', 'log': log})
+        # Return content
+        elif pkt_type == 'Data':
+            if node == receiver:
+                # self.controller.clear_probcahce_c
+                # self.controller.clear_probcahce_N
+                # self.controller.clear_probcahce_x
+                print('flow:', flow, ', ProbCache_PKT_LEVEL Received')
+                self.controller.end_flow_session(flow, log)
+            else:
+                path = self.view.shortest_path(node, receiver)
+                if path[1] in self.cache_size:
+                    self.controller.add_probcache_x(flow)
+                    print('flow:', flow, 'x', self.view.get_probcache_x(flow))
+                self.controller.forward_content_hop_flow(node, path[1], flow, log)
+                if path[1] != receiver and path[1] in self.cache_size:
+                    # The (x/c) factor raised to the power of "c" according to the
+                    # extended version of ProbCache published in IEEE TPDS
+                    N = self.view.get_probcache_N(flow)
+                    x = self.view.get_probcache_x(flow)
+                    c = self.view.get_probcache_c(flow)
+                    prob_cache = float(N) / (self.t_tw * self.cache_size[path[1]]) * (x / c) ** c
+                    if random.random() < prob_cache:
+                        print('flow:', flow, 'ProbCache_PKT_LEVEL make a copy')
+                        self.controller.put_content_flow(node, content, flow)
+                if node in self.cache_size:
+                    self.controller.subtract_probcache_N(flow, self.cache_size[node])
+                    print('flow,', flow, 'N:', self.view.get_probcache_N(flow))
+                delay = self.view.link_delay(node, path[1])
+                t_event = time + delay
+                self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Data', 'log': log})
+        else:
+            raise ValueError('Invalid packet type')
+
 
 
 @register_strategy('CL4M')

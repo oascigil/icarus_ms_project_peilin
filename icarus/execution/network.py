@@ -329,6 +329,7 @@ class NetworkView(object):
         if node in self.model.cache:
             return self.model.cache[node].dump()
 
+    # get LCD status
     def get_lcd_flow_copied_flag(self, flow):
         """Return the flag indicating copied or not in LCD
 
@@ -338,6 +339,38 @@ class NetworkView(object):
                False for not copied yet
         """
         return self.model.lcd_pkt_level_copied_flag[flow]
+
+    # get ProbCache status
+    def get_probcache_c(self, flow):
+        """Return the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flag : True for already copied
+               False for not copied yet
+        """
+        return self.model.ProbCache_c[flow]
+
+    def get_probcache_N(self, flow):
+        """Return the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flag : True for already copied
+               False for not copied yet
+        """
+        return self.model.ProbCache_N[flow]
+
+    def get_probcache_x(self, flow):
+        """Return the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flag : True for already copied
+               False for not copied yet
+        """
+        return self.model.ProbCache_x[flow]
+
 
 class NetworkModel(object):
     """Models the internal state of the network.
@@ -438,6 +471,15 @@ class NetworkModel(object):
 
         # LCD packet level flag indicating content copied or not
         self.lcd_pkt_level_copied_flag = {}
+
+        # ProbCache parameters
+        # c: the number of nodes that has cache when returning content
+        self.ProbCache_c = {}
+        # N: the sum of cache sizes of nodes when returning content
+        self.ProbCache_N = {}
+        # x: the number of nodes that in cache_size
+        self.ProbCache_x = {}
+
 
 
 class NetworkController(object):
@@ -1010,6 +1052,9 @@ class NetworkController(object):
         if node in self.model.local_cache:
             return self.model.local_cache[node].put(self.session['content'])
 
+
+    # LCD operations
+
     def set_lcd_flow_copied_flag(self, flow, flag):
         """Set the flag indicating copied or not in LCD
 
@@ -1022,3 +1067,136 @@ class NetworkController(object):
         """
         self.model.lcd_pkt_level_copied_flag[flow] = flag
         # print('model, set flag', self.model.lcd_pkt_level_copied_flag)
+
+
+    # ProbCache operations
+
+    def start_probcache_c(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_c[flow] = 0
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def add_probcache_c(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_c[flow] += 1
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def clear_probcache_c(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_c[flow] = 0
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def start_probcache_N(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_N[flow] = 0
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def add_probcache_N(self, flow, n):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_N[flow] += n
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def subtract_probcache_N(self, flow, n):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_N[flow] += n
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def clear_probcache_N(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_N[flow] = 0
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def start_probcache_x(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_x[flow] = 0.0
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def add_probcache_x(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_x[flow] += 1
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
+
+    def clear_probcache_x(self, flow):
+        """Set the flag indicating copied or not in LCD
+
+        Parameters
+        ----------
+        flow: Indicating the flow number
+
+        flag : True for already copied
+               False for not copied yet
+        """
+        self.model.ProbCache_x[flow] = 0
+        # print('ProbCache start count c', self.model.ProbCache_c[flow])
