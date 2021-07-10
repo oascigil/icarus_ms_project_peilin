@@ -16,6 +16,7 @@ import logging
 
 import networkx as nx
 import fnss
+import time
 
 from icarus.registry import CACHE_POLICY
 from icarus.util import iround, path_links
@@ -152,6 +153,36 @@ class NetworkView(object):
         """Return the eventQ
         """
         return self.model.eventQ
+
+    # put the first cache event of each router in a single queue
+    # and sort according to time, return the first event
+    def peek_next_cache_event(self):
+        """put the first cache event of each router in a single queue and sort according to time,
+           return the first event in the new queue without removing the event from the cacheQ
+        """
+        queue = []
+        for events in self.model.cacheQ:
+            queue.append(events[0]) if (events != []) else None
+            queue.sort(key=lambda i: i['t_event'])
+        return queue[0] if (queue != []) else None
+
+    def cacheQ(self):
+        """Return the cacheQ
+        """
+        return self.model.cacheQ
+
+    def cacheQ_node(self, node):
+        """Return the cacheQ in a node
+        """
+        return self.model.cacheQ[node]
+
+    # get cache operations delay penalty
+    def get_cache_queue_delay_penalty(self):
+        return self.model.cacheQ_delay_penalty
+
+    # get cache queue size
+    def get_cache_queue_size(self):
+        return self.model.cacheQ_size
 
     def cluster(self, v):
         """Return cluster to which a node belongs, if any
@@ -468,6 +499,11 @@ class NetworkModel(object):
 
         # A priority queue of events
         self.eventQ = []
+
+        #  A priority queue of cache read/write events
+        self.cacheQ = [[],[]]
+        self.cacheQ_delay_penalty = 0.1
+        self.cacheQ_size = 10 ** 2
 
         # LCD packet level flag indicating content copied or not
         self.lcd_pkt_level_copied_flag = {}
@@ -795,6 +831,54 @@ class NetworkController(object):
             return True
         else:
             return False
+
+    # add delay penalty of cache operations
+    def add_cache_queue_event(self, node, event):
+        """ Add an event to the eventQ
+        Parameters
+        ----------
+
+        node : the node
+        event : a new event
+            a dict
+        """
+        self.model.cacheQ[node].insert(0,event)
+        # Sort events in the eventQ by "time of event" (t_event)
+        #self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
+        self.model.cacheQ[node].sort(key=lambda i:i['t_event'])
+
+    def pop_next_cache_event(self, node):
+        """
+        Remove the first (soonest) event from the eventQ
+        """
+        event = self.model.cacheQ[node].pop(0)
+        return event
+
+    def cache_operation_flow(self, flow, log, main_path=True):
+        """Write a content to cache or read a content from cache.
+
+        Parameters
+        ----------
+        main_path : bool, optional
+            If *True*, indicates that this link is being traversed by content
+            that will be delivered to the receiver. This is needed to
+            calculate latency correctly in multicast cases. Default value is
+            *True*
+        """
+        if self.collector is not None and log:
+            self.collector.cache_operation_flow(flow, main_path)
+
+    # set cache operations delay penalty
+    def set_cache_queue_delay_penalty(self, delay=1):
+        self.model.cacheQ_delay_penalty = delay
+
+    # set cache size
+    def set_cache_queue_size(self, size=10**2):
+        self.model.cacheQ_size = size
+
+    # append the cache queue
+    def append_cache_queue(self):
+        self.model.cacheQ.append([])
 
     def remove_content(self, node):
         """Remove the content being handled from the cache

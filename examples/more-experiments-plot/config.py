@@ -30,7 +30,7 @@ RESULTS_FORMAT = 'PICKLE'
 
 # Number of times each experiment is replicated
 # This is necessary for extracting confidence interval of selected metrics
-N_REPLICATIONS = 2
+N_REPLICATIONS = 1
 
 # List of metrics to be measured in the experiments
 # The implementation of data collectors are located in ./icarus/execution/collectors.py
@@ -48,24 +48,29 @@ DATA_COLLECTORS = ['CACHE_HIT_RATIO', 'LATENCY']
 # This would give problems while trying to plot the results because if for
 # example I wanted to filter experiment with alpha=0.8, experiments with
 # alpha = 0.799999999999 would not be recognized
-ALPHA = [0.6, 0.8, 1, 1.2]
+ALPHA = [0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8]
 
 # Total size of network cache as a fraction of content population
-NETWORK_CACHE = [0.004, 0.01, 0.03, 0.05, 0.07, 0.1, 0.3]
+NETWORK_CACHE = [0.004, 0.01, 0.05, 0.1, 0.3, 0.5]
+# NETWORK_CACHE = [0.1]
 
 # Number of content objects
-N_CONTENTS = 3 * 10 ** 5
+N_CONTENTS = 3 * 10 ** 3
 
 # Number of requests per second (over the whole network)
 NETWORK_REQUEST_RATE = 12.0
 
 # Number of content requests generated to prepopulate the caches
 # These requests are not logged
-N_WARMUP_REQUESTS = 3 * 10 ** 5
+N_WARMUP_REQUESTS = 3 * 10 ** 3
 
 # Number of content requests generated after the warmup and logged
 # to generate results.
-N_MEASURED_REQUESTS = 6 * 10 ** 5
+N_MEASURED_REQUESTS = 6 * 10 ** 3
+
+DELAY_PENALTY = 0.1
+
+CACHE_QUEUE_SIZE = 10 ** 2
 
 # List of all implemented topologies
 # Topology implementations are located in ./icarus/scenarios/topology.py
@@ -75,11 +80,17 @@ TOPOLOGIES = [
 
 # List of caching and routing strategies
 # The code is located in ./icarus/models/strategy.py
+# STRATEGIES = [
+#         'LCE',
+#         'LCD'
+#         ]
+
 STRATEGIES = [
-     'LCE',  # Leave Copy Everywhere
-    # 'NO_CACHE',  # No caching, shorest-path routing
-    # 'PROB_CACHE',  # ProbCache
-     'LCD'  # Leave Copy Down
+     # 'LCE_PKT_LEVEL',  # Leave Copy Everywhere
+     # 'NO_CACHE',  # No caching, shorest-path routing
+     # 'PROB_CACHE',  # ProbCache
+     # 'LCD_PKT_LEVEL'  # Leave Copy Down
+     'LCE_PL_CD'   # LCE packet level cache delay
              ]
 
 # Cache replacement policy used by the network caches.
@@ -90,11 +101,13 @@ CACHE_POLICY = 'LRU'
 # Queue of experiments
 EXPERIMENT_QUEUE = deque()
 default = Tree()
-default['workload'] = {'name':       'STATIONARY',
+default['workload'] = {'name':       'STATIONARY_PACKET_LEVEL_CACHE_DELAY',
                        'n_contents': N_CONTENTS,
                        'n_warmup':   N_WARMUP_REQUESTS,
                        'n_measured': N_MEASURED_REQUESTS,
-                       'rate':       NETWORK_REQUEST_RATE
+                       'rate':       NETWORK_REQUEST_RATE,
+                       'delay_penalty': DELAY_PENALTY,
+                       'cache_queue_size': CACHE_QUEUE_SIZE
                        }
 default['cache_placement']['name'] = 'UNIFORM'
 default['content_placement']['name'] = 'UNIFORM'
@@ -105,7 +118,7 @@ for alpha in ALPHA:
     for strategy in STRATEGIES:
         for topology in TOPOLOGIES:
             for network_cache in NETWORK_CACHE:
-                print('strategy is: ', strategy)
+                # print('strategy is: ', strategy)
                 experiment = copy.deepcopy(default)
                 experiment['workload']['alpha'] = alpha
                 experiment['strategy']['name'] = strategy

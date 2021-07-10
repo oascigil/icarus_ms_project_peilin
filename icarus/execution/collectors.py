@@ -211,6 +211,18 @@ class DataCollector(object):
             *True*
         """
         pass
+    def cache_operation_flow(self, flow, main_path=True):
+        """Implement the cache operation delay penalty into latency*
+
+        Parameters
+        ----------
+        main_path : bool, optional
+            If *True*, indicates that this link is being tranversed by content
+            that will be delivered to the receiver. This is needed to
+            calculate latency correctly in multicast cases. Default value is 
+            *True*
+        """
+        pass
 
     def end_session(self, success=True):
         """Reports that the session is closed, i.e. the content has been
@@ -439,6 +451,7 @@ class LatencyCollector(DataCollector):
             self.latency_data = collections.deque()
 
         self.sess_latency_flow = {}
+        self.cache_delay_penalty_flow = {}
         
 
     @inheritdoc(DataCollector)
@@ -450,6 +463,7 @@ class LatencyCollector(DataCollector):
     def start_flow_session(self, timestamp, receiver, content, flow):
         self.sess_count += 1
         self.sess_latency_flow[flow] = 0.0
+        self.cache_delay_penalty_flow[flow] = 0.0
 
     @inheritdoc(DataCollector)
     def request_hop(self, u, v, main_path=True):
@@ -472,6 +486,11 @@ class LatencyCollector(DataCollector):
             self.sess_latency_flow[flow] += self.view.link_delay(u, v)
 
     @inheritdoc(DataCollector)
+    def cache_operation_flow(self, flow, main_path=True):
+        if main_path:
+            self.cache_delay_penalty_flow[flow] += self.view.get_cache_queue_delay_penalty()
+
+    @inheritdoc(DataCollector)
     def end_session(self, success=True):
         if not success:
             return
@@ -485,8 +504,11 @@ class LatencyCollector(DataCollector):
             return
         if self.cdf:
             self.latency_data.append(self.sess_latency_flow[flow])
-        self.latency += self.sess_latency_flow[flow]
-        del self.sess_latency_flow[flow]
+        # print('latnecy', self.sess_latency_flow[flow])
+        # print('lenth of cache delay penalty flow', len(self.cache_delay_penalty_flow))
+        # print('delay penalty', self.cache_delay_penalty_flow[flow])
+        self.latency += (self.sess_latency_flow[flow] + self.cache_delay_penalty_flow[flow])
+        del self.sess_latency_flow[flow], self.cache_delay_penalty_flow[flow]
 
     @inheritdoc(DataCollector)
     def results(self):
@@ -557,7 +579,7 @@ class CacheHitRatioCollector(DataCollector):
     @inheritdoc(DataCollector)
     def cache_hit(self, node):
         self.cache_hits += 1
-        if self.off_path_hits and node not in self.curr_path_flow[flow]:
+        if self.off_path_hits and node not in self.curr_path:
             self.off_path_hit_count += 1
         if self.cont_hits:
             self.cont_cache_hits[self.curr_cont] += 1
@@ -567,7 +589,7 @@ class CacheHitRatioCollector(DataCollector):
     @inheritdoc(DataCollector)
     def cache_hit_flow(self, node, content, flow):
         self.cache_hits += 1
-        if self.off_path_hits and node not in self.curr_path:
+        if self.off_path_hits and node not in self.curr_path_flow[flow]:
             self.off_path_hit_count += 1
         if self.cont_hits:
             self.cont_cache_hits[self.curr_cont_flow[flow]] += 1

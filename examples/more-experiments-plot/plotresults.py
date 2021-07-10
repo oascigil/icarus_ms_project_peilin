@@ -42,33 +42,37 @@ PLOT_EMPTY_GRAPHS = True
 # On-path strategies: dashed lines
 # No-cache: dotted line
 STRATEGY_STYLE = {
-         'LCE':             'b--p',
-         'LCD':             'g-->'
-         #'PROB_CACHE':      'c--<',
-         #'NO_CACHE':        'k:o'
+         'LCE_PKT_LEVEL':             'b--p',
+         'LCD_PKT_LEVEL':             'g-->',
+         'PROB_CACHE':      'c--<',
+         'LCE_PL_CD':        'k:o',
+         # 'PROB_CACHE_PKT_LEVEL':      'k:o'
                 }
 
 # This dict maps name of strategies to names to be displayed in the legend
 STRATEGY_LEGEND = {
-         'LCE':             'LCE',
-         'LCD':             'LCD'
-         #'PROB_CACHE':      'ProbCache',
-         #'NO_CACHE':        'No caching'
+         'LCE_PKT_LEVEL':             'LCE packet level',
+         'LCD_PKT_LEVEL':             'LCD packet level',
+         'PROB_CACHE':      'ProbCache',
+         'LCE_PK_CD':        'LCE packet level add cache delay',
+         'PROB_CACHE_PKT_LEVEL':      'ProbCache packet level'
                     }
 
 # Color and hatch styles for bar charts of cache hit ratio and link load vs topology
 STRATEGY_BAR_COLOR = {
-    'LCE':          'k',
-    'LCD':          '0.3'
-    #'NO_CACHE':     '0.5',
-    #'PROB_CACHE':   '0.7'
+    'LCE_PKT_LEVEL':          'k',
+    'LCD_PKT_LEVEL':          '0.3',
+    'LCE_PL_CD':     '0.5',
+    # 'PROB_CACHE':   '0.5',
+    'PROB_CACHE_PKT_LEVEL':   '0.7'
     }
 
 STRATEGY_BAR_HATCH = {
-    'LCE':          None,
-    'LCD':          '//'
-    #'NO_CACHE':     'x',
-    #'PROB_CACHE':     '+'
+    'LCE_PKT_LEVEL':          None,
+    'LCD_PKT_LEVEL':          '//',
+    'PROB_CACHE':     'x',
+    'LCE_PL_CD':   '+',
+    # 'PROB_CACHE_PKT_LEVEL':   '+'
     }
 
 
@@ -78,7 +82,7 @@ def plot_cache_hits_vs_alpha(resultset, topology, cache_size, alpha_range, strat
     desc = {}
     desc['title'] = 'Cache hit ratio: T=%s C=%s' % (topology, cache_size)
     desc['ylabel'] = 'Cache hit ratio'
-    desc['xlabel'] = u'Content distribution \u03b1'
+    desc['xlabel'] = 'Content distribution parameter'
     desc['xparam'] = ('workload', 'alpha')
     desc['xvals'] = alpha_range
     desc['filter'] = {'topology': {'name': topology},
@@ -106,7 +110,7 @@ def plot_cache_hits_vs_cache_size(resultset, topology, alpha, cache_size_range, 
     desc['xparam'] = ('cache_placement', 'network_cache')
     desc['xvals'] = cache_size_range
     desc['filter'] = {'topology': {'name': topology},
-                      'workload': {'name': 'STATIONARY', 'alpha': alpha}}
+                      'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}}
     desc['ymetrics'] = [('CACHE_HIT_RATIO', 'MEAN')] * len(strategies)
     desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
     desc['ycondvals'] = strategies
@@ -123,7 +127,7 @@ def plot_cache_hits_vs_cache_size(resultset, topology, alpha, cache_size_range, 
 def plot_latency_vs_alpha(resultset, topology, cache_size, alpha_range, strategies, plotdir):
     desc = {}
     desc['title'] = 'Latency: T=%s C=%s' % (topology, cache_size)
-    desc['xlabel'] = u'Content distribution \u03b1'
+    desc['xlabel'] = 'Content distribution parameter'
     desc['ylabel'] = 'Latency (ms)'
     desc['xparam'] = ('workload', 'alpha')
     desc['xvals'] = alpha_range
@@ -144,17 +148,17 @@ def plot_latency_vs_alpha(resultset, topology, cache_size, alpha_range, strategi
 def plot_latency_vs_cache_size(resultset, topology, alpha, cache_size_range, strategies, plotdir):
     desc = {}
     desc['title'] = 'Latency: T=%s A=%s' % (topology, alpha)
-    desc['xlabel'] = 'Cache to population ratio'
-    desc['ylabel'] = 'Latency'
+    desc['xlabel'] = u'Cache to population ratio'
+    desc['ylabel'] = 'Latency (ms)'
     # desc['xscale'] = 'log'
     desc['xparam'] = ('cache_placement', 'network_cache')
     desc['xvals'] = cache_size_range
     desc['filter'] = {'topology': {'name': topology},
-                      'workload': {'name': 'STATIONARY', 'alpha': alpha}}
+                      'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}}
     desc['ymetrics'] = [('LATENCY', 'MEAN')] * len(strategies)
     desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
     desc['ycondvals'] = strategies
-    desc['metric'] = ('LATENCY', 'MEAN')
+    # desc['metric'] = ('LATENCY', 'MEAN')
     desc['errorbar'] = True
     desc['legend_loc'] = 'upper right'
     desc['line_style'] = STRATEGY_STYLE

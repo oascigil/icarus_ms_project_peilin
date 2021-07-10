@@ -30,7 +30,8 @@ __all__ = [
         'GlobetraffWorkload',
         'TraceDrivenWorkload',
         'YCSBWorkload',
-        'StationaryPacketLevelWorkload'
+        'StationaryPacketLevelWorkload',
+        'StationaryPacketLevelWorkloadWithCacheDelay'
            ]
 
 @register_workload('STATIONARY_PACKET_LEVEL')
@@ -111,17 +112,18 @@ class StationaryPacketLevelWorkload(object):
         flow_counter = 0
         t_next_flow = 0.0
         # print('Stationary-pkt-level, enter iter')
-
         while ( (flow_counter < self.n_warmup + self.n_measured) or len(self.view.eventQ())>0 ):
             # print('Stationary-pkt-level, enter iter while')
             t_next_flow += (random.expovariate(self.rate))
             event = self.view.peek_next_event()
-            while (event is not  None) and (event['t_event'] < t_next_flow):
+            print('enter outer while, flow_counter:', flow_counter)
+            while (event is not None) and (event['t_event'] < t_next_flow):
                 event = self.controller.pop_next_event()
                 t_event = event['t_event']
                 del event['t_event']
                 yield(t_event, event)
-                event = self.view.peek_next_event() 
+                event = self.view.peek_next_event()
+                print('flow_counter:', flow_counter, 't_event', t_event, 'event:', event)
 
             if flow_counter >= (self.n_warmup + self.n_measured):
                 continue
@@ -132,9 +134,151 @@ class StationaryPacketLevelWorkload(object):
             content = int(self.zipf.rv())
             log = (flow_counter >= self.n_warmup)
             event = {'receiver': receiver, 'content': content, 'node': receiver, 'flow': flow_counter, 'pkt_type': 'Request', 'log': log}
+            print('flow counter: ', flow_counter, 't_next_flow', t_next_flow, 'event:', event)
             yield (t_next_flow, event)
             flow_counter += 1
-            # print('flow counter: ', flow_counter)
+        return
+
+@register_workload('STATIONARY_PACKET_LEVEL_CACHE_DELAY')
+class StationaryPacketLevelWorkloadWithCacheDelay(object):
+    """This function generates events on the fly, i.e. instead of creating an
+    event schedule to be kept in memory, returns an iterator that generates
+    events when needed.
+
+    This is useful for running large schedules of events where RAM is limited
+    as its memory impact is considerably lower.
+
+    These requests are Poisson-distributed while content popularity is
+    Zipf-distributed
+
+    All requests are mapped to receivers uniformly unless a positive *beta*
+    parameter is specified.
+
+    If a *beta* parameter is specified, then receivers issue requests at
+    different rates. The algorithm used to determine the requests rates for
+    each receiver is the following:
+     * All receiver are sorted in decreasing order of degree of the PoP they
+       are attached to. This assumes that all receivers have degree = 1 and are
+       attached to a node with degree > 1
+     * Rates are then assigned following a Zipf distribution of coefficient
+       beta where nodes with higher-degree PoPs have a higher request rate
+
+    Parameters
+    ----------
+    topology : fnss.Topology
+        The topology to which the workload refers
+    n_contents : int
+        The number of content object
+    alpha : float
+        The Zipf alpha parameter
+    beta : float, optional
+        Parameter indicating
+    rate : float, optional
+        The mean rate of requests per second
+    n_warmup : int, optional
+        The number of warmup requests (i.e. requests executed to fill cache but
+        not logged)
+    n_measured : int, optional
+        The number of logged requests after the warmup
+
+    Returns
+    -------
+    events : iterator
+        Iterator of events. Each event is a 2-tuple where the first element is
+        the timestamp at which the event occurs and the second element is a
+        dictionary of event attributes.
+    """
+    def __init__(self, topology, n_contents, alpha, beta=0, rate=1.0,
+                    n_warmup=10 ** 5, n_measured=4 * 10 ** 5, delay_penalty=0.1, cache_queue_size=10**2, seed=None, **kwargs):
+        if alpha < 0:
+            raise ValueError('alpha must be positive')
+        if beta < 0:
+            raise ValueError('beta must be positive')
+        self.receivers = [v for v in topology.nodes()
+                     if topology.node[v]['stack'][0] == 'receiver']
+        self.zipf = TruncatedZipfDist(alpha, n_contents)
+        self.n_contents = n_contents
+        self.contents = range(1, n_contents + 1)
+        self.alpha = alpha
+        self.rate = rate
+        self.n_warmup = n_warmup
+        self.n_measured = n_measured
+        random.seed(seed)
+        self.view = None
+        self.controller = None
+        self.beta = beta
+        self.delay_penalty = delay_penalty
+        self.cache_queue_size = cache_queue_size
+        # self.controller.set_cache_queue_delay_penalty(delay_penalty)
+        # self.controller.set_cache_queue_size(cache_queue_size)
+        # print('Stationary-pkt-level, enter init')
+        if beta != 0:
+            degree = nx.degree(self.topology)
+            self.receivers = sorted(self.receivers, key=lambda x: degree[iter(topology.adj[x]).next()], reverse=True)
+            self.receiver_dist = TruncatedZipfDist(beta, len(self.receivers))
+
+    def __iter__(self):
+        self.controller.set_cache_queue_delay_penalty(self.delay_penalty)
+        self.controller.set_cache_queue_size(self.cache_queue_size)
+        flow_counter = 0    
+        t_next_flow = 0.0
+        # print('Stationary-pkt-level, enter iter')
+        while ( (flow_counter < self.n_warmup + self.n_measured) or len(self.view.eventQ())>0 ):
+            # print('Stationary-pkt-level, enter iter while')
+            t_next_flow += (random.expovariate(self.rate))
+            print('flow counter:', flow_counter, ', t_next_flow:', t_next_flow)
+            event1 = self.view.peek_next_event()
+            event2 = self.view.peek_next_cache_event()
+            # print('enter outer while, flow_counter:', flow_counter)
+            while ((event1 is not None) and (event1['t_event'] < t_next_flow)) \
+                    or ((event2 is not None) and (event2['t_event'] < t_next_flow)):
+                if ((event1 is not None) and (event1['t_event'] < t_next_flow)) \
+                        and ((event2 is None) or (event2['t_event'] >= t_next_flow)):
+                    event1 = self.controller.pop_next_event()
+                    t_event = event1['t_event']
+                    print('event1 enabled, add event1, event1', event1, ', event2', event2)
+                    del event1['t_event']
+                    yield(t_event, event1)
+                    event1 = self.view.peek_next_event()
+                elif ((event2 is not None) and (event2['t_event'] < t_next_flow)) \
+                        and ((event1 is None) or (event1['t_event'] >= t_next_flow)):
+                    node = event2['node']
+                    event2 = self.controller.pop_next_cache_event(node)
+                    t_event = event2['t_event']
+                    print('event2 enabled, add event2, event1', event1, ', event2', event2)
+                    del event2['t_event']
+                    yield (t_event, event2)
+                    event2 = self.view.peek_next_cache_event()
+                else:
+                    if event1['t_event'] < event2['t_event']:
+                        event1 = self.controller.pop_next_event()
+                        t_event = event1['t_event']
+                        print('both enabled, add event1, event1', event1, ', event2', event2)
+                        del event1['t_event']
+                        yield (t_event, event1)
+                        event1 = self.view.peek_next_event()
+                    else:
+                        node = event2['node']
+                        event2 = self.controller.pop_next_cache_event(node)
+                        t_event = event2['t_event']
+                        print('both enabled, add event2, event1', event1, ', event2', event2)
+                        del event2['t_event']
+                        yield (t_event, event2)
+                        event2 = self.view.peek_next_cache_event()
+                # print('flow_counter:', flow_counter, 't_event', t_event, 'event:', event)
+
+            if flow_counter >= (self.n_warmup + self.n_measured):
+                continue
+            if self.beta == 0:
+                receiver = random.choice(self.receivers)
+            else:
+                receiver = self.receivers[self.receiver_dist.rv() - 1]
+            content = int(self.zipf.rv())
+            log = (flow_counter >= self.n_warmup)
+            event = {'receiver': receiver, 'content': content, 'node': receiver, 'flow': flow_counter, 'pkt_type': 'Request', 'log': log}
+            # print('flow counter: ', flow_counter, 't_next_flow', t_next_flow, 'event:', event)
+            yield (t_next_flow, event)
+            flow_counter += 1
         return
 
 @register_workload('STATIONARY')
