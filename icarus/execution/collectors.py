@@ -486,9 +486,11 @@ class LatencyCollector(DataCollector):
             self.sess_latency_flow[flow] += self.view.link_delay(u, v)
 
     @inheritdoc(DataCollector)
-    def cache_operation_flow(self, flow, main_path=True):
+    def cache_operation_flow(self, node, flow, main_path=True):
+        queue_size = self.view.get_cacheQ_length_node_flow(node, flow)
+        queue_delay = queue_size * self.view.get_cache_queue_delay_penalty()
         if main_path:
-            self.cache_delay_penalty_flow[flow] += self.view.get_cache_queue_delay_penalty()
+            self.cache_delay_penalty_flow[flow] += queue_delay
 
     @inheritdoc(DataCollector)
     def end_session(self, success=True):
@@ -504,9 +506,6 @@ class LatencyCollector(DataCollector):
             return
         if self.cdf:
             self.latency_data.append(self.sess_latency_flow[flow])
-        # print('latnecy', self.sess_latency_flow[flow])
-        # print('lenth of cache delay penalty flow', len(self.cache_delay_penalty_flow))
-        # print('delay penalty', self.cache_delay_penalty_flow[flow])
         self.latency += (self.sess_latency_flow[flow] + self.cache_delay_penalty_flow[flow])
         del self.sess_latency_flow[flow], self.cache_delay_penalty_flow[flow]
 

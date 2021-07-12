@@ -172,7 +172,8 @@ class LeaveCopyEverywherePacketLevel(Strategy):
 
 @register_strategy('LCE_PL_CD')
 class LeaveCopyEverywherePacketLevelCacheDelay(Strategy):
-    """Leave Copy Everywhere (LCE) packet-level strategy.
+    """Leave Copy Everywhere (LCE) packet-level strategy,
+    which implement the cache operation delay penalty.
 
     In this strategy a copy of a content is replicated at any cache on the
     path between serving node and receiver.
@@ -187,7 +188,11 @@ class LeaveCopyEverywherePacketLevelCacheDelay(Strategy):
         # get all required data
         # Route requests to original source and queries caches on the path
         while node >= len(self.view.cacheQ()):
-            self.controller.append_cache_queue()
+            self.controller.append_cacheQ()
+        while node >= len(self.view.cacheQ_length()):
+            self.controller.append_cacheQ_length()
+        while flow >= len(self.view.cacheQ_node_length(node)):
+            self.controller.append_cacheQ_length_node(node)
         if pkt_type == 'Request':
             if node == receiver:
                 self.controller.start_flow_session(time, receiver, content, flow, log)
@@ -197,13 +202,15 @@ class LeaveCopyEverywherePacketLevelCacheDelay(Strategy):
                     and self.controller.get_content_flow(node, content, flow, log):
                 # path = self.view.shortest_path(node, receiver)
                 delay_penalty = self.view.get_cache_queue_delay_penalty()
-                # t_event calculation not sure
-                queue_delay = (len(self.view.cacheQ_node(node)) + 1) * delay_penalty
+                queue_length = len(self.view.cacheQ_node(node))
+                queue_delay = queue_length * delay_penalty
                 t_event = time + queue_delay
                 print('flow:', flow, ', in request, add get content')
                 self.controller.add_cache_queue_event(node, {'t_event': t_event, 'receiver': receiver,
                                                              'content': content, 'node': node, 'flow': flow,
                                                              'pkt_type': 'get_content', 'log': log})
+                queue_length += 1
+                self.controller.update_cache_queue_length(node, flow, queue_length)
                 return
             path = self.view.shortest_path(node, source)
             delay = self.view.link_delay(node, path[1])
@@ -221,13 +228,15 @@ class LeaveCopyEverywherePacketLevelCacheDelay(Strategy):
                 if self.view.has_cache(node) and len(self.view.cacheQ_node(node)) < self.view.get_cache_queue_size():
                     # self.controller.put_content_flow(node, content, flow, log)
                     delay_penalty = self.view.get_cache_queue_delay_penalty()
-                    # t_event calculation not sure
-                    queue_delay = (len(self.view.cacheQ_node(node)) + 1) * delay_penalty
+                    queue_length = len(self.view.cacheQ_node(node))
+                    queue_delay = queue_length * delay_penalty
                     t_event = time + queue_delay
                     print('flow:', flow, ', in data, add put content')
                     self.controller.add_cache_queue_event(node, {'t_event': t_event, 'receiver': receiver,
                                                                  'content': content, 'node': node, 'flow': flow,
                                                                  'pkt_type': 'put_content', 'log': log})
+                    queue_length += 1
+                    self.controller.update_cache_queue_length(node, flow, queue_length)
                     return
                 path = self.view.shortest_path(node, receiver)
                 self.controller.forward_content_hop_flow(node, path[1], flow, log)
@@ -239,9 +248,10 @@ class LeaveCopyEverywherePacketLevelCacheDelay(Strategy):
                                             'pkt_type': 'Data', 'log': log})
         elif pkt_type == 'get_content':
             # add the get operation
-            self.controller.cache_operation_flow(flow, log)
+            self.controller.cache_operation_flow(node, flow, log)
             path = self.view.shortest_path(node, receiver)
-            delay = self.view.link_delay(node, path[1])
+            delay = self.view.get_cache_queue_delay_penalty() + self.view.link_delay(node, path[1])
+            # delay = self.view.link_delay(node, path[1])
             t_event = time + delay
             print('flow:', flow, ', in get_content, add data')
             self.controller.forward_content_hop_flow(node, path[1], flow, log)
@@ -250,9 +260,11 @@ class LeaveCopyEverywherePacketLevelCacheDelay(Strategy):
                                        'pkt_type': 'Data', 'log': log} )
         elif pkt_type == 'put_content':
             #  put content delay
-            self.controller.cache_operation_flow(flow, log)
+            self.controller.cache_operation_flow(node, flow, log)
+            self.controller.put_content_flow(node, content, flow)
             path = self.view.shortest_path(node, receiver)
-            delay = self.view.link_delay(node, path[1])
+            delay = self.view.get_cache_queue_delay_penalty() + self.view.link_delay(node, path[1])
+            # delay = self.view.link_delay(node, path[1])
             t_event = time + delay
             print('flow:', flow, ', in put_content, add data')
             self.controller.forward_content_hop_flow(node, path[1], flow, log)
@@ -427,6 +439,7 @@ class LeaveCopyDownPacketLevel (Strategy):
                 self.controller.add_event({'t_event': t_event, 'receiver': receiver, 'content': content, 'node': path[1], 'flow': flow, 'pkt_type': 'Data', 'log': log})
         else:
             raise ValueError('Invalid packet type')
+
 
 
 @register_strategy('PROB_CACHE')

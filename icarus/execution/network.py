@@ -176,6 +176,19 @@ class NetworkView(object):
         """
         return self.model.cacheQ[node]
 
+    def cacheQ_length(self):
+        """Return the cacheQ
+        """
+        return self.model.cacheQ_length
+
+    # get cache queue length in a node
+    def cacheQ_node_length(self, node):
+        return self.model.cacheQ_length[node]
+
+    # get cache queue length in a node for collector
+    def get_cacheQ_length_node_flow(self, node, flow):
+        return self.model.cacheQ_length[node][flow]
+
     # get cache operations delay penalty
     def get_cache_queue_delay_penalty(self):
         return self.model.cacheQ_delay_penalty
@@ -502,6 +515,7 @@ class NetworkModel(object):
 
         #  A priority queue of cache read/write events
         self.cacheQ = [[],[]]
+        self.cacheQ_length = [[],[]]
         self.cacheQ_delay_penalty = 0.1
         self.cacheQ_size = 10 ** 2
 
@@ -877,8 +891,20 @@ class NetworkController(object):
         self.model.cacheQ_size = size
 
     # append the cache queue
-    def append_cache_queue(self):
+    def append_cacheQ(self):
         self.model.cacheQ.append([])
+
+    # append the list of cache queue length
+    def append_cacheQ_length(self):
+        self.model.cacheQ_length.append([])
+
+    # append the list of cache queue length for a node
+    def append_cacheQ_length_node(self, node):
+        self.model.cacheQ_length[node].append([])
+
+    # update cache queue length for calculation
+    def update_cache_queue_length(self, node, flow, length):
+        self.model.cacheQ_length[node][flow] = length
 
     def remove_content(self, node):
         """Remove the content being handled from the cache
