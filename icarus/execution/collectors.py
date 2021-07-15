@@ -211,7 +211,7 @@ class DataCollector(object):
             *True*
         """
         pass
-    def cache_operation_flow(self, flow, main_path=True):
+    def cache_operation_flow(self, node, flow, main_path=True):
         """Implement the cache operation delay penalty into latency*
 
         Parameters

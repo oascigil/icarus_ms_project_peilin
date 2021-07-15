@@ -189,7 +189,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
         dictionary of event attributes.
     """
     def __init__(self, topology, n_contents, alpha, beta=0, rate=1.0,
-                    n_warmup=10 ** 5, n_measured=4 * 10 ** 5, delay_penalty=0.1, cache_queue_size=10**2, seed=None, **kwargs):
+                    n_warmup=10 ** 5, n_measured=4 * 10 ** 5, delay_penalty=10, cache_queue_size=10**2, seed=None, **kwargs):
         if alpha < 0:
             raise ValueError('alpha must be positive')
         if beta < 0:

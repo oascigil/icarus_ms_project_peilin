@@ -516,7 +516,7 @@ class NetworkModel(object):
         #  A priority queue of cache read/write events
         self.cacheQ = [[],[]]
         self.cacheQ_length = [[],[]]
-        self.cacheQ_delay_penalty = 0.1
+        self.cacheQ_delay_penalty = 10
         self.cacheQ_size = 10 ** 2
 
         # LCD packet level flag indicating content copied or not
@@ -868,7 +868,7 @@ class NetworkController(object):
         event = self.model.cacheQ[node].pop(0)
         return event
 
-    def cache_operation_flow(self, flow, log, main_path=True):
+    def cache_operation_flow(self, node, flow, log, main_path=True):
         """Write a content to cache or read a content from cache.
 
         Parameters
@@ -880,7 +880,7 @@ class NetworkController(object):
             *True*
         """
         if self.collector is not None and log:
-            self.collector.cache_operation_flow(flow, main_path)
+            self.collector.cache_operation_flow(node, flow, main_path)
 
     # set cache operations delay penalty
     def set_cache_queue_delay_penalty(self, delay=1):
