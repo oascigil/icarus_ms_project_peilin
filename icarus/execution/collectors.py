@@ -248,6 +248,18 @@ class DataCollector(object):
         """
         pass
 
+    def end_flow_session_cache_delay(self, flow, success=True):
+        """Reports that the session is closed, i.e. the content has been
+        successfully delivered to the receiver or a failure blocked the
+        execution of the request
+
+        Parameters
+        ----------
+        success : bool, optional
+            *True* if the session was completed successfully, *False* otherwise
+        """
+        pass
+
     def results(self):
         """Returns the aggregated results measured by the collector.
 
@@ -272,7 +284,7 @@ class CollectorProxy(DataCollector):
     dispatching events of interests to concrete collectors.
     """
 
-    EVENTS = ('start_session', 'start_flow_session', 'end_session', 'end_flow_session', 'cache_hit', 'cache_hit_flow', 'cache_miss', 'cache_miss_flow', 'server_hit', 'server_hit_flow', 'request_hop', 'request_hop_flow', 'content_hop', 'content_hop_flow','results')
+    EVENTS = ('start_session', 'start_flow_session', 'end_session', 'end_flow_session', 'cache_operation_flow','cache_hit', 'cache_hit_flow', 'cache_miss', 'cache_miss_flow', 'server_hit', 'server_hit_flow', 'request_hop', 'request_hop_flow', 'content_hop', 'content_hop_flow','results')
 
     def __init__(self, view, collectors):
         """Constructor
@@ -349,6 +361,11 @@ class CollectorProxy(DataCollector):
             c.content_hop_flow(u, v, flow, main_path)
 
     @inheritdoc(DataCollector)
+    def cache_operation_flow(self, node, flow, main_path=True):
+        for c in self.collectors['cache_operation_flow']:
+            c.cache_operation_flow(node, flow, main_path)
+
+    @inheritdoc(DataCollector)
     def end_session(self, success=True):
         for c in self.collectors['end_session']:
             c.end_session(success)
@@ -357,6 +374,11 @@ class CollectorProxy(DataCollector):
     def end_flow_session(self, flow, success=True):
         for c in self.collectors['end_session']:
             c.end_flow_session(flow, success)
+
+    @inheritdoc(DataCollector)
+    def end_flow_session_cache_delay(self, flow, success=True):
+        for c in self.collectors['end_session']:
+            c.end_flow_session_cache_delay(flow, success)
 
     @inheritdoc(DataCollector)
     def results(self):
@@ -506,6 +528,17 @@ class LatencyCollector(DataCollector):
             return
         if self.cdf:
             self.latency_data.append(self.sess_latency_flow[flow])
+        self.latency += self.sess_latency_flow[flow]
+        # self.latency += (self.sess_latency_flow[flow] + self.cache_delay_penalty_flow[flow])
+        del self.sess_latency_flow[flow]
+
+    @inheritdoc(DataCollector)
+    def end_flow_session_cache_delay(self, flow, success=True):
+        if not success:
+            return
+        if self.cdf:
+            self.latency_data.append(self.sess_latency_flow[flow])
+        # self.latency += self.sess_latency_flow[flow]
         self.latency += (self.sess_latency_flow[flow] + self.cache_delay_penalty_flow[flow])
         del self.sess_latency_flow[flow], self.cache_delay_penalty_flow[flow]
 

@@ -116,14 +116,14 @@ class StationaryPacketLevelWorkload(object):
             # print('Stationary-pkt-level, enter iter while')
             t_next_flow += (random.expovariate(self.rate))
             event = self.view.peek_next_event()
-            print('enter outer while, flow_counter:', flow_counter)
+            # print('enter outer while, flow_counter:', flow_counter)
             while (event is not None) and (event['t_event'] < t_next_flow):
                 event = self.controller.pop_next_event()
                 t_event = event['t_event']
                 del event['t_event']
                 yield(t_event, event)
                 event = self.view.peek_next_event()
-                print('flow_counter:', flow_counter, 't_event', t_event, 'event:', event)
+                # print('flow_counter:', flow_counter, 't_event', t_event, 'event:', event)
 
             if flow_counter >= (self.n_warmup + self.n_measured):
                 continue
@@ -134,7 +134,7 @@ class StationaryPacketLevelWorkload(object):
             content = int(self.zipf.rv())
             log = (flow_counter >= self.n_warmup)
             event = {'receiver': receiver, 'content': content, 'node': receiver, 'flow': flow_counter, 'pkt_type': 'Request', 'log': log}
-            print('flow counter: ', flow_counter, 't_next_flow', t_next_flow, 'event:', event)
+            # print('flow counter: ', flow_counter, 't_next_flow', t_next_flow, 'event:', event)
             yield (t_next_flow, event)
             flow_counter += 1
         return
@@ -226,7 +226,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
         while ( (flow_counter < self.n_warmup + self.n_measured) or len(self.view.eventQ())>0 ):
             # print('Stationary-pkt-level, enter iter while')
             t_next_flow += (random.expovariate(self.rate))
-            print('flow counter:', flow_counter, ', t_next_flow:', t_next_flow)
+            # print('flow counter:', flow_counter, ', t_next_flow:', t_next_flow)
             event1 = self.view.peek_next_event()
             event2 = self.view.peek_next_cache_event()
             # print('enter outer while, flow_counter:', flow_counter)
@@ -236,7 +236,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
                         and ((event2 is None) or (event2['t_event'] >= t_next_flow)):
                     event1 = self.controller.pop_next_event()
                     t_event = event1['t_event']
-                    print('event1 enabled, add event1, event1', event1, ', event2', event2)
+                    # print('event1 enabled, add event1, event1', event1, ', event2', event2)
                     del event1['t_event']
                     yield(t_event, event1)
                     event1 = self.view.peek_next_event()
@@ -245,7 +245,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
                     node = event2['node']
                     event2 = self.controller.pop_next_cache_event(node)
                     t_event = event2['t_event']
-                    print('event2 enabled, add event2, event1', event1, ', event2', event2)
+                    # print('event2 enabled, add event2, event1', event1, ', event2', event2)
                     del event2['t_event']
                     yield (t_event, event2)
                     event2 = self.view.peek_next_cache_event()
@@ -253,7 +253,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
                     if event1['t_event'] < event2['t_event']:
                         event1 = self.controller.pop_next_event()
                         t_event = event1['t_event']
-                        print('both enabled, add event1, event1', event1, ', event2', event2)
+                        # print('both enabled, add event1, event1', event1, ', event2', event2)
                         del event1['t_event']
                         yield (t_event, event1)
                         event1 = self.view.peek_next_event()
@@ -261,7 +261,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
                         node = event2['node']
                         event2 = self.controller.pop_next_cache_event(node)
                         t_event = event2['t_event']
-                        print('both enabled, add event2, event1', event1, ', event2', event2)
+                        # print('both enabled, add event2, event1', event1, ', event2', event2)
                         del event2['t_event']
                         yield (t_event, event2)
                         event2 = self.view.peek_next_cache_event()

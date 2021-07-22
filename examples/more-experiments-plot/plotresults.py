@@ -42,44 +42,49 @@ PLOT_EMPTY_GRAPHS = True
 # On-path strategies: dashed lines
 # No-cache: dotted line
 STRATEGY_STYLE = {
-         'LCE_PKT_LEVEL':             'b--p',
-         'LCD_PKT_LEVEL':             'g-->',
-         'PROB_CACHE':      'c--<',
-         'LCE_PL_CD':        'k:o',
-         # 'PROB_CACHE_PKT_LEVEL':      'k:o'
+         'LCE_PKT_LEVEL':             'k--o',
+         'LCD_PKT_LEVEL':             'r--v',
+         'PROB_CACHE_PKT_LEVEL':      'c--s',
+         'LCE_PL_CD':                 'k-o',
+         'LCD_PL_CD':                 'r-v',
+         'PROB_CACHE_PL_CD':          'c-s'
                 }
 
 # This dict maps name of strategies to names to be displayed in the legend
 STRATEGY_LEGEND = {
          'LCE_PKT_LEVEL':             'LCE packet level',
          'LCD_PKT_LEVEL':             'LCD packet level',
-         'PROB_CACHE':      'ProbCache',
-         'LCE_PK_CD':        'LCE packet level add cache delay',
-         'PROB_CACHE_PKT_LEVEL':      'ProbCache packet level'
+         'PROB_CACHE_PKT_LEVEL':      'ProbCache packet level',
+         'LCE_PL_CD':                 'LCE packet level add cache delay',
+         'LCD_PL_CD':                 'LCD packet level add cache delay',
+         'PROB_CACHE_PL_CD':          'ProbCache packet level add cache delay'  
                     }
 
 # Color and hatch styles for bar charts of cache hit ratio and link load vs topology
 STRATEGY_BAR_COLOR = {
-    'LCE_PKT_LEVEL':          'k',
-    'LCD_PKT_LEVEL':          '0.3',
-    'LCE_PL_CD':     '0.5',
-    # 'PROB_CACHE':   '0.5',
-    'PROB_CACHE_PKT_LEVEL':   '0.7'
+    'LCE_PKT_LEVEL':            'k',
+    'LCD_PKT_LEVEL':            '0.2',
+    'PROB_CACHE_PKT_LEVEL':     '0.4',
+    'LCE_PL_CD':                '0.6',
+    'LCD_PL_CD':                '0.7',
+    'PROB_CACHE_PL_CD':         '0.9'
     }
 
 STRATEGY_BAR_HATCH = {
-    'LCE_PKT_LEVEL':          None,
-    'LCD_PKT_LEVEL':          '//',
-    'PROB_CACHE':     'x',
-    'LCE_PL_CD':   '+',
-    # 'PROB_CACHE_PKT_LEVEL':   '+'
+    'LCE_PKT_LEVEL':              None,
+    'LCD_PKT_LEVEL':              '//',
+    'PROB_CACHE_PACKET_LEVEL':    'x',
+    'LCE_PL_CD':                  'o',
+    'LCD_PL_CD':                  '//',
+    'PROB_CACHE_PL_CD':           '+'
     }
 
 
 def plot_cache_hits_vs_alpha(resultset, topology, cache_size, alpha_range, strategies, plotdir):
-    if 'NO_CACHE' in strategies:
-        strategies.remove('NO_CACHE')
+    # if 'NO_CACHE' in strategies:
+        # strategies.remove('NO_CACHE')
     desc = {}
+    print(resultset)
     desc['title'] = 'Cache hit ratio: T=%s C=%s' % (topology, cache_size)
     desc['ylabel'] = 'Cache hit ratio'
     desc['xlabel'] = 'Content distribution parameter'
@@ -101,8 +106,8 @@ def plot_cache_hits_vs_alpha(resultset, topology, cache_size, alpha_range, strat
 
 def plot_cache_hits_vs_cache_size(resultset, topology, alpha, cache_size_range, strategies, plotdir):
     desc = {}
-    if 'NO_CACHE' in strategies:
-        strategies.remove('NO_CACHE')
+    # if 'NO_CACHE' in strategies:
+        # strategies.remove('NO_CACHE')
     desc['title'] = 'Cache hit ratio: T=%s A=%s' % (topology, alpha)
     desc['xlabel'] = u'Cache to population ratio'
     desc['ylabel'] = 'Cache hit ratio'
@@ -110,7 +115,8 @@ def plot_cache_hits_vs_cache_size(resultset, topology, alpha, cache_size_range, 
     desc['xparam'] = ('cache_placement', 'network_cache')
     desc['xvals'] = cache_size_range
     desc['filter'] = {'topology': {'name': topology},
-                      'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}}
+                      # 'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}}
+                      'workload': {'alpha': alpha}}       
     desc['ymetrics'] = [('CACHE_HIT_RATIO', 'MEAN')] * len(strategies)
     desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
     desc['ycondvals'] = strategies
@@ -154,7 +160,8 @@ def plot_latency_vs_cache_size(resultset, topology, alpha, cache_size_range, str
     desc['xparam'] = ('cache_placement', 'network_cache')
     desc['xvals'] = cache_size_range
     desc['filter'] = {'topology': {'name': topology},
-                      'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}}
+                      # 'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}
+                      'workload': {'alpha': alpha}}
     desc['ymetrics'] = [('LATENCY', 'MEAN')] * len(strategies)
     desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
     desc['ycondvals'] = strategies
@@ -176,15 +183,16 @@ def plot_cache_hits_vs_topology(resultset, alpha, cache_size, topology_range, st
     The objective here is to show that our algorithms works well on all
     topologies considered
     """
-    if 'NO_CACHE' in strategies:
-        strategies.remove('NO_CACHE')
+    # if 'NO_CACHE' in strategies:
+        # strategies.remove('NO_CACHE')
     desc = {}
     desc['title'] = 'Cache hit ratio: A=%s C=%s' % (alpha, cache_size)
     desc['ylabel'] = 'Cache hit ratio'
     desc['xparam'] = ('topology', 'name')
     desc['xvals'] = topology_range
     desc['filter'] = {'cache_placement': {'network_cache': cache_size},
-                      'workload': {'name': 'STATIONARY', 'alpha': alpha}}
+                      # 'workload': {'name': 'STATIONARY', 'alpha': alpha}
+                      'workload': {'alpha': alpha}}
     desc['ymetrics'] = [('CACHE_HIT_RATIO', 'MEAN')] * len(strategies)
     desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
     desc['ycondvals'] = strategies
@@ -224,6 +232,7 @@ def run(config, results, plotdir):
     cache_sizes = settings.NETWORK_CACHE
     alphas = settings.ALPHA
     strategies = settings.STRATEGIES
+    print(strategies)
     # Plot graphs
     for topology in topologies:
         for cache_size in cache_sizes:

@@ -17,6 +17,7 @@ import logging
 import networkx as nx
 import fnss
 import time
+import heapq
 
 from icarus.registry import CACHE_POLICY
 from icarus.util import iround, path_links
@@ -147,7 +148,8 @@ class NetworkView(object):
         """Return the next (soonest) event in the eventQ without removing the 
            event from the eventQ
         """
-        return self.model.eventQ[0] if len(self.model.eventQ) > 0 else None
+        return self.model.eventQ[0][1] if len(self.model.eventQ) > 0 else None
+        # return self.model.eventQ[0] if len(self.model.eventQ) > 0 else None
 
     def eventQ(self):
         """Return the eventQ
@@ -161,10 +163,16 @@ class NetworkView(object):
            return the first event in the new queue without removing the event from the cacheQ
         """
         queue = []
+        heapq.heapify(queue)
         for events in self.model.cacheQ:
-            queue.append(events[0]) if (events != []) else None
-            queue.sort(key=lambda i: i['t_event'])
-        return queue[0] if (queue != []) else None
+            if events != []:
+                event = events[0]
+                heapq.heappush(queue, event)
+
+            # queue.append(events[0]) if (events != []) else None
+            # queue.sort(key=lambda i: i['t_event'])
+        return queue[0][1] if (queue != []) else None
+        # return queue[0] if (queue != []) else None
 
     def cacheQ(self):
         """Return the cacheQ
@@ -177,7 +185,7 @@ class NetworkView(object):
         return self.model.cacheQ[node]
 
     def cacheQ_length(self):
-        """Return the cacheQ
+        """Return the cacheQ length
         """
         return self.model.cacheQ_length
 
@@ -512,9 +520,11 @@ class NetworkModel(object):
 
         # A priority queue of events
         self.eventQ = []
+        # heapq.heapify(self.eventQ)
 
         #  A priority queue of cache read/write events
         self.cacheQ = [[],[]]
+        # heapq.heapify(self.cacheQ)
         self.cacheQ_length = [[],[]]
         self.cacheQ_delay_penalty = 10
         self.cacheQ_size = 10 ** 2
@@ -559,17 +569,20 @@ class NetworkController(object):
         event : a new event
             a dict
         """
-        self.model.eventQ.insert(0,event)
-        # Sort events in the eventQ by "time of event" (t_event)
-        #self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
-        self.model.eventQ.sort(key=lambda i:i['t_event'])
+        # self.model.eventQ.insert(0,event)
+        ## Sort events in the eventQ by "time of event" (t_event)
+        ## self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
+        # self.model.eventQ.sort(key=lambda i:i['t_event'])
+        heapq.heappush(self.model.eventQ, (event['t_event'], event))
 
     def pop_next_event(self):
         """
         Remove the first (soonest) event from the eventQ
         """
-        event = self.model.eventQ.pop(0)
-        return event
+        event = heapq.heappop(self.model.eventQ)
+        return event[1]
+        # event = self.model.eventQ.pop(0)
+        # return event
 
     def attach_collector(self, collector):
         """Attach a data collector to which all events will be reported.
@@ -856,17 +869,20 @@ class NetworkController(object):
         event : a new event
             a dict
         """
-        self.model.cacheQ[node].insert(0,event)
-        # Sort events in the eventQ by "time of event" (t_event)
-        #self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
-        self.model.cacheQ[node].sort(key=lambda i:i['t_event'])
+        heapq.heappush(self.model.cacheQ[node], (event['t_event'], event))
+        # self.model.cacheQ[node].insert(0,event)
+        ## Sort events in the eventQ by "time of event" (t_event)
+        ## self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
+        # self.model.cacheQ[node].sort(key=lambda i:i['t_event'])
 
     def pop_next_cache_event(self, node):
         """
         Remove the first (soonest) event from the eventQ
         """
-        event = self.model.cacheQ[node].pop(0)
-        return event
+        event = heapq.heappop(self.model.cacheQ[node])
+        return event[1]
+        # event = self.model.cacheQ[node].pop(0)
+        # return event
 
     def cache_operation_flow(self, node, flow, log, main_path=True):
         """Write a content to cache or read a content from cache.
@@ -932,6 +948,18 @@ class NetworkController(object):
         """
         if self.collector is not None and log:
             self.collector.end_flow_session(flow, success)
+
+    def end_flow_session_cache_delay(self, flow, log, success=True):
+        """Close a session
+
+        Parameters
+        ----------
+        success : bool, optional
+            *True* if the session was completed successfully, *False* otherwise
+        """
+        if self.collector is not None and log:
+            self.collector.end_flow_session_cache_delay(flow, success)
+
 
     def end_session(self, success=True):
         """Close a session
