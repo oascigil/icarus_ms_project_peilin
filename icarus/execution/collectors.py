@@ -11,6 +11,7 @@ inheriting from the `DataCollector` class and override all required methods.
 """
 from __future__ import division
 import collections
+from matplotlib import pyplot as plt
 
 from icarus.registry import register_data_collector
 from icarus.tools import cdf
@@ -211,6 +212,7 @@ class DataCollector(object):
             *True*
         """
         pass
+
     def cache_operation_flow(self, node, flow, main_path=True):
         """Implement the cache operation delay penalty into latency*
 
@@ -474,6 +476,7 @@ class LatencyCollector(DataCollector):
 
         self.sess_latency_flow = {}
         self.cache_delay_penalty_flow = {}
+        self.cache_queue_length = {}
         
 
     @inheritdoc(DataCollector)
@@ -486,6 +489,8 @@ class LatencyCollector(DataCollector):
         self.sess_count += 1
         self.sess_latency_flow[flow] = 0.0
         self.cache_delay_penalty_flow[flow] = 0.0
+        # if node not in self.cache_queue_length:
+            # self.cache_queue_length[node] = []
 
     @inheritdoc(DataCollector)
     def request_hop(self, u, v, main_path=True):
@@ -508,11 +513,14 @@ class LatencyCollector(DataCollector):
             self.sess_latency_flow[flow] += self.view.link_delay(u, v)
 
     @inheritdoc(DataCollector)
-    def cache_operation_flow(self, node, flow, main_path=True):
-        queue_size = self.view.get_cacheQ_length_node_flow(node, flow)
-        queue_delay = queue_size * self.view.get_cache_queue_delay_penalty()
+    def cache_operation_flow(self, flow, queue_delay, main_path=True):
+        # print('collector cache operation flow, queue_delay = ', queue_delay)
         if main_path:
             self.cache_delay_penalty_flow[flow] += queue_delay
+
+    def cache_queue_length(self, node, main_path=True):
+        if main_path:
+            self.cache_queue_length[node].append(len(self.view.cacheQ_node(node)))
 
     @inheritdoc(DataCollector)
     def end_session(self, success=True):
@@ -529,7 +537,6 @@ class LatencyCollector(DataCollector):
         if self.cdf:
             self.latency_data.append(self.sess_latency_flow[flow])
         self.latency += self.sess_latency_flow[flow]
-        # self.latency += (self.sess_latency_flow[flow] + self.cache_delay_penalty_flow[flow])
         del self.sess_latency_flow[flow]
 
     @inheritdoc(DataCollector)
@@ -537,8 +544,7 @@ class LatencyCollector(DataCollector):
         if not success:
             return
         if self.cdf:
-            self.latency_data.append(self.sess_latency_flow[flow])
-        # self.latency += self.sess_latency_flow[flow]
+            self.latency_data.append(self.sess_latency_flow[flow] + self.cache_delay_penalty_flow[flow])
         self.latency += (self.sess_latency_flow[flow] + self.cache_delay_penalty_flow[flow])
         del self.sess_latency_flow[flow], self.cache_delay_penalty_flow[flow]
 
@@ -547,7 +553,6 @@ class LatencyCollector(DataCollector):
         results = Tree({'MEAN': self.latency / self.sess_count})
         if self.cdf:
             results['CDF'] = cdf(self.latency_data)
-
         return results
 
 @register_data_collector('CACHE_HIT_RATIO')

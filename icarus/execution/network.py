@@ -164,14 +164,18 @@ class NetworkView(object):
         """
         queue = []
         heapq.heapify(queue)
-        for events in self.model.cacheQ:
+        for node in self.model.cacheQ:
+            events = self.model.cacheQ[node]
             if events != []:
-                event = events[0]
-                heapq.heappush(queue, event)
+                heapq.heappush(queue, events[0])
 
+        if queue != []:
+            next_event = queue[0]
+            return next_event[1]
+        else:
+            return None
             # queue.append(events[0]) if (events != []) else None
             # queue.sort(key=lambda i: i['t_event'])
-        return queue[0][1] if (queue != []) else None
         # return queue[0] if (queue != []) else None
 
     def cacheQ(self):
@@ -182,28 +186,69 @@ class NetworkView(object):
     def cacheQ_node(self, node):
         """Return the cacheQ in a node
         """
-        return self.model.cacheQ[node]
+        if node in self.model.cacheQ:
+            return self.model.cacheQ[node]
+        else:
+            return []
 
-    def cacheQ_length(self):
-        """Return the cacheQ length
+    def cacheQ_server(self, node):
+        """Return the event in the server
         """
-        return self.model.cacheQ_length
+        if node in self.model.server:
+            return self.model.server[node]
+        else:
+            return None
 
-    # get cache queue length in a node
-    def cacheQ_node_length(self, node):
-        return self.model.cacheQ_length[node]
+    # get read operations delay penalty
+    def get_read_delay_penalty(self):
+        return self.model.read_delay_penalty
 
-    # get cache queue length in a node for collector
-    def get_cacheQ_length_node_flow(self, node, flow):
-        return self.model.cacheQ_length[node][flow]
-
-    # get cache operations delay penalty
-    def get_cache_queue_delay_penalty(self):
-        return self.model.cacheQ_delay_penalty
+    # get write operations delay penalty
+    def get_write_delay_penalty(self):
+        return self.model.write_delay_penalty
 
     # get cache queue size
     def get_cache_queue_size(self):
         return self.model.cacheQ_size
+
+    # get cache queue delay
+    def get_cache_queue_delay(self, node, time):
+        read_delay_penalty = self.model.read_delay_penalty
+        write_delay_penalty = self.model.write_delay_penalty
+        server = self.cacheQ_server(node)
+        cacheQ = self.cacheQ_node(node)
+        delay = 0
+        if server == None and cacheQ == []:
+            delay = 0
+            t_event = time + delay
+        elif server == None and cacheQ != []:
+            event = heapq.nlargest(1, cacheQ)
+            event = event[0][1]
+            if event['pkt_type'] == 'get_content':
+                delay += read_delay_penalty
+            elif event['pkt_type'] == 'put_content:':
+                delay += write_delay_penalty
+            t_event = event['t_event'] + delay
+        elif server != None and cacheQ == []:
+            # server delay
+            if server['pkt_type'] == 'get_content':
+                delay += read_delay_penalty
+            elif server['pkt_type'] == 'put_content:':
+                delay += write_delay_penalty
+            t_event = server['t_event'] + delay
+        else:
+            event = heapq.nlargest(1, cacheQ)
+            event = event[0][1]
+            if event['pkt_type'] == 'get_content':
+                delay += read_delay_penalty
+            elif event['pkt_type'] == 'put_content':
+                delay += write_delay_penalty
+            t_event = event['t_event'] + delay
+        queue_delay = t_event - time
+        if queue_delay < 0:
+            queue_delay = 0
+        return queue_delay
+
 
     def cluster(self, v):
         """Return cluster to which a node belongs, if any
@@ -520,13 +565,14 @@ class NetworkModel(object):
 
         # A priority queue of events
         self.eventQ = []
-        # heapq.heapify(self.eventQ)
+        heapq.heapify(self.eventQ)
 
         #  A priority queue of cache read/write events
-        self.cacheQ = [[],[]]
-        # heapq.heapify(self.cacheQ)
-        self.cacheQ_length = [[],[]]
-        self.cacheQ_delay_penalty = 10
+        self.cacheQ = {}
+        self.server = {}
+        # self.cacheQ_length = [[],[]]
+        self.read_delay_penalty = 10
+        self.write_delay_penalty = 10
         self.cacheQ_size = 10 ** 2
 
         # LCD packet level flag indicating content copied or not
@@ -573,12 +619,14 @@ class NetworkController(object):
         ## Sort events in the eventQ by "time of event" (t_event)
         ## self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
         # self.model.eventQ.sort(key=lambda i:i['t_event'])
+        # print('add event:', event)
         heapq.heappush(self.model.eventQ, (event['t_event'], event))
 
     def pop_next_event(self):
         """
         Remove the first (soonest) event from the eventQ
         """
+        # print('soonest event', self.model.eventQ[0])
         event = heapq.heappop(self.model.eventQ)
         return event[1]
         # event = self.model.eventQ.pop(0)
@@ -869,6 +917,10 @@ class NetworkController(object):
         event : a new event
             a dict
         """
+        # print('enter add cache queue event, node:', node, ', event:', event)
+        if node not in self.model.cacheQ:
+            self.model.cacheQ[node] = []
+            heapq.heapify(self.model.cacheQ[node])
         heapq.heappush(self.model.cacheQ[node], (event['t_event'], event))
         # self.model.cacheQ[node].insert(0,event)
         ## Sort events in the eventQ by "time of event" (t_event)
@@ -884,7 +936,38 @@ class NetworkController(object):
         # event = self.model.cacheQ[node].pop(0)
         # return event
 
-    def cache_operation_flow(self, node, flow, log, main_path=True):
+    # add delay penalty of cache operations
+    def update_cache_queue_server(self, node, t_event, event):
+        """ Push an event to the eventQ server.
+        Single server.
+        Parameters
+        ----------
+
+        node : the node
+        event : a new event
+            a dict
+        """
+        event['t_event'] = t_event
+        self.model.server[node] = event
+        # self.model.cacheQ[node].insert(0,event)
+        ## Sort events in the eventQ by "time of event" (t_event)
+        ## self.model.eventQ = sorted(self.model.eventQ, key = lambda i: i['t_event'])
+        # self.model.cacheQ[node].sort(key=lambda i:i['t_event'])
+
+    def pop_cache_queue_server(self, node):
+        """
+        Remove the first (soonest) event from the eventQ
+        """
+        event = self.model.server[node].pop(0)
+        return event
+
+    # def record_cache_queue_length(self, node, log, main_path=True):
+    #    """Record the cache queue length of a node.
+    #    """
+    #    if self.collector is not None and log:
+    #        self.collector.cache_queue_length(node, main_path)
+
+    def cache_operation_flow(self, flow, delay, log, main_path=True):
         """Write a content to cache or read a content from cache.
 
         Parameters
@@ -895,32 +978,22 @@ class NetworkController(object):
             calculate latency correctly in multicast cases. Default value is
             *True*
         """
+        # print('cache_operation_flow')
         if self.collector is not None and log:
-            self.collector.cache_operation_flow(node, flow, main_path)
+            self.collector.cache_operation_flow(flow, delay, main_path)
 
     # set cache operations delay penalty
-    def set_cache_queue_delay_penalty(self, delay=1):
-        self.model.cacheQ_delay_penalty = delay
+    def set_read_delay_penalty(self, delay):
+        self.model.read_delay_penalty = delay
+
+    # set cache operations delay penalty
+    def set_write_delay_penalty(self, delay):
+        self.model.write_delay_penalty = delay
 
     # set cache size
     def set_cache_queue_size(self, size=10**2):
         self.model.cacheQ_size = size
 
-    # append the cache queue
-    def append_cacheQ(self):
-        self.model.cacheQ.append([])
-
-    # append the list of cache queue length
-    def append_cacheQ_length(self):
-        self.model.cacheQ_length.append([])
-
-    # append the list of cache queue length for a node
-    def append_cacheQ_length_node(self, node):
-        self.model.cacheQ_length[node].append([])
-
-    # update cache queue length for calculation
-    def update_cache_queue_length(self, node, flow, length):
-        self.model.cacheQ_length[node][flow] = length
 
     def remove_content(self, node):
         """Remove the content being handled from the cache
