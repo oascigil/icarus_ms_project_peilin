@@ -157,7 +157,7 @@ def topology_tree(k, h, delay=1, **kwargs):
 
 
 @register_topology_factory('PATH')
-def topology_path(n, delay=1, **kwargs):
+def topology_path(n, delay_int=1, delay_ext=100, **kwargs):
     """Return a path topology with a receiver on node `0` and a source at node
     'n-1'
 
@@ -177,7 +177,7 @@ def topology_path(n, delay=1, **kwargs):
     receivers = [0]
     routers = range(1, n - 1)
     sources = [n - 1]
-    topology.graph['icr_candidates'] = set(routers)
+    # topology.graph['icr_candidates'] = set(routers)
     for v in sources:
         fnss.add_stack(topology, v, 'source')
     for v in receivers:
@@ -185,11 +185,20 @@ def topology_path(n, delay=1, **kwargs):
     for v in routers:
         fnss.add_stack(topology, v, 'router')
     # set weights and delays on all links
+    internal_links = [(receivers[0], routers[0])]
+    external_links = [(routers[0], sources[0])]
+    for u, v in internal_links:
+        topology.add_edge(u, v, type='internal')
+    for u, v in external_links:
+        topology.add_edge(u, v, type='external')
+    topology.graph['icr_candidates'] = set(routers)
+    fnss.set_delays_constant(topology, delay_int, 'ms', internal_links)
+    fnss.set_delays_constant(topology, delay_ext, 'ms', external_links)
     fnss.set_weights_constant(topology, 1.0)
-    fnss.set_delays_constant(topology, delay, 'ms')
+    # fnss.set_delays_constant(topology, delay, 'ms')
     # label links as internal or external
-    for u, v in topology.edges():
-        topology.adj[u][v]['type'] = 'internal'
+    # for u, v in topology.edges():
+        # topology.adj[u][v]['type'] = 'internal'
     return IcnTopology(topology)
 
 

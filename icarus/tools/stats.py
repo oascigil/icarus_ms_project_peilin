@@ -88,6 +88,10 @@ class DiscreteDist(object):
         # This operation performs binary search over the CDF to return the
         # random value. Worst case time complexity is O(log2(n))
         return int(np.searchsorted(self._cdf, rv) + 1)
+        # rv_index = int(np.searchsorted(self._cdf, rv) + 1)
+        # content_index = list(range(0, n_content))
+        # random.shuffle(content_index)
+        # return int(np.searchsorted(content_index, rv_index) + 1)
 
 
 class TruncatedZipfDist(DiscreteDist):

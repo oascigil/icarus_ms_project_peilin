@@ -188,8 +188,8 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
         the timestamp at which the event occurs and the second element is a
         dictionary of event attributes.
     """
-    def __init__(self, topology, n_contents, alpha, beta=0, rate=1.0,
-                    n_warmup=10 ** 5, n_measured=4 * 10 ** 5, read_delay_penalty=10,
+    def __init__(self, topology, n_contents, alpha, # server_processing_rate,
+                    beta=0, rate=1.0, n_warmup=10 ** 5, n_measured=4 * 10 ** 5, read_delay_penalty=10,
                     write_delay_penalty=10, cache_queue_size=10**2, seed=None, **kwargs):
         if alpha < 0:
             raise ValueError('alpha must be positive')
@@ -211,8 +211,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
         self.read_delay_penalty = read_delay_penalty
         self.write_delay_penalty = write_delay_penalty
         self.cache_queue_size = cache_queue_size
-        # self.controller.set_cache_queue_delay_penalty(delay_penalty)
-        # self.controller.set_cache_queue_size(cache_queue_size)
+        # self.server_processing_rate = server_processing_rate
         # print('Stationary-pkt-level, enter init')
         if beta != 0:
             degree = nx.degree(self.topology)
