@@ -81,17 +81,19 @@ class DiscreteDist(object):
         """
         return self._cdf
 
-    def rv(self):
+    def rv(self, n_contents):
         """Get rand value from the distribution
         """
         rv = random.random()
         # This operation performs binary search over the CDF to return the
         # random value. Worst case time complexity is O(log2(n))
-        return int(np.searchsorted(self._cdf, rv) + 1)
-        # rv_index = int(np.searchsorted(self._cdf, rv) + 1)
-        # content_index = list(range(0, n_content))
-        # random.shuffle(content_index)
-        # return int(np.searchsorted(content_index, rv_index) + 1)
+        # return int(np.searchsorted(self._cdf, rv) + 1)
+        rv_index = int(np.searchsorted(self._cdf, rv) + 1)
+        # print('rv index:', rv_index)
+        content_index = list(range(0, n_contents - 1))
+        random.shuffle(content_index)
+        # print('content index:', int(np.searchsorted(content_index, rv_index) + 1))
+        return int(np.searchsorted(content_index, rv_index) + 1)
 
 
 class TruncatedZipfDist(DiscreteDist):
