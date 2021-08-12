@@ -129,7 +129,6 @@ def plot_cache_hits_vs_cache_size(resultset, topology, alpha, cache_size_range, 
                % (topology, alpha), plotdir)
 
 
-
 def plot_latency_vs_alpha(resultset, topology, cache_size, alpha_range, strategies, plotdir):
     desc = {}
     desc['title'] = 'Latency: T=%s C=%s' % (topology, cache_size)
@@ -149,7 +148,6 @@ def plot_latency_vs_alpha(resultset, topology, cache_size, alpha_range, strategi
     desc['plotempty'] = PLOT_EMPTY_GRAPHS
     plot_lines(resultset, desc, 'LATENCY_T=%s@C=%s.pdf'
                % (topology, cache_size), plotdir)
-
 
 def plot_latency_vs_cache_size(resultset, topology, alpha, cache_size_range, strategies, plotdir):
     desc = {}
@@ -173,6 +171,7 @@ def plot_latency_vs_cache_size(resultset, topology, alpha, cache_size_range, str
     desc['plotempty'] = PLOT_EMPTY_GRAPHS
     plot_lines(resultset, desc, 'LATENCY_T=%s@A=%s.pdf'
                % (topology, alpha), plotdir)
+
 
 
 def plot_cache_hits_vs_topology(resultset, alpha, cache_size, topology_range, strategies, plotdir):
@@ -205,8 +204,98 @@ def plot_cache_hits_vs_topology(resultset, alpha, cache_size, topology_range, st
     plot_bar_chart(resultset, desc, 'CACHE_HIT_RATIO_A=%s_C=%s.pdf'
                    % (alpha, cache_size), plotdir)
 
+def plot_cache_hits_vs_server_processing_rate(resultset, topology, cache_size, alpha, server_rate_range, strategies, plotdir):
+    desc = {}
+    desc['title'] = 'Cache hit ratio: T=%s C=%s A=%s' % (topology, cache_size, alpha)
+    desc['xlabel'] = 'Server processing rate'
+    desc['ylabel'] = 'Cache hit ratio'
+    desc['xparam'] = ('workload', 'server_processing_rate')
+    desc['xvals'] = server_rate_range
+    desc['filter'] = {'topology': {'name': topology},
+                      'cache_placement': {'network_cache': cache_size},
+                      'workload': {'alpha': alpha}}
+    desc['ymetrics'] = [('CACHE_HIT_RATIO', 'MEAN')] * len(strategies)
+    desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
+    desc['ycondvals'] = strategies
+    desc['errorbar'] = True
+    desc['legend_loc'] = 'upper right'
+    desc['line_style'] = STRATEGY_STYLE
+    desc['legend'] = STRATEGY_LEGEND
+    desc['plotempty'] = PLOT_EMPTY_GRAPHS
+    plot_lines(resultset, desc, 'CACHE_HIT_RATIO_T=%s@C=%s@A=%s.pdf'
+               % (topology, cache_size, alpha), plotdir)
+
+def plot_latency_vs_server_processing_rate(resultset, topology, cache_size, alpha, server_rate_range, strategies, plotdir):
+    desc = {}
+    desc['title'] = 'Latency: T=%s C=%s A=%s' % (topology, cache_size, alpha)
+    desc['xlabel'] = 'Server processing rate'
+    desc['ylabel'] = 'Latency (ms)'
+    desc['xparam'] = ('workload', 'server_processing_rate')
+    desc['xvals'] = server_rate_range
+    desc['filter'] = {'topology': {'name': topology},
+                      'cache_placement': {'network_cache': cache_size},
+                      'workload': {'alpha': alpha}}
+    desc['ymetrics'] = [('LATENCY', 'MEAN')] * len(strategies)
+    desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
+    desc['ycondvals'] = strategies
+    desc['errorbar'] = True
+    desc['legend_loc'] = 'upper right'
+    desc['line_style'] = STRATEGY_STYLE
+    desc['legend'] = STRATEGY_LEGEND
+    desc['plotempty'] = PLOT_EMPTY_GRAPHS
+    plot_lines(resultset, desc, 'LATENCY_T=%s@C=%s@A=%s.pdf'
+               % (topology, cache_size, alpha), plotdir)
 
 
+def plot_rejected(resultset, topology, alpha, cache_size, n, strategies, plotdir):
+    print('in plot rejected')
+    desc = {}
+    desc['title'] = 'Percentage of rejected packet: T=%s C=%s A=%s' % (topology, cache_size, alpha)
+    desc['xlabel'] = u'node'
+    desc['ylabel'] = 'Percentage of rejected packet'
+    # desc['xscale'] = 'log'
+    desc['xparam'] = ('topology', 'n')
+    desc['xvals'] = n
+    desc['filter'] = {'topology': {'name': topology},
+                      # 'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}
+                      'workload': {'alpha': alpha},
+                      'cache_placement': {'network_cache': cache_size}}
+    desc['ymetrics'] = [('CACHE_QUEUE', 'Percentage_of_rejection')] * len(strategies)
+    desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
+    desc['ycondvals'] = strategies
+    # desc['metric'] = ('LATENCY', 'MEAN')
+    desc['errorbar'] = True
+    desc['legend_loc'] = 'upper right'
+    desc['line_style'] = STRATEGY_STYLE
+    desc['legend'] = STRATEGY_LEGEND
+    desc['plotempty'] = PLOT_EMPTY_GRAPHS
+    plot_lines(resultset, desc, 'REJECTED_T=%s@C=%s@A=%s.pdf'
+               % (topology, cache_size, alpha), plotdir)
+
+def plot_cache_queue_size(resultset, topology, alpha, cache_size, n, strategies, plotdir):
+    print('in plot queue size')
+    desc = {}
+    desc['title'] = 'Average cache queue size: T=%s C=%s A=%s' % (topology, cache_size, alpha)
+    desc['xlabel'] = u'node'
+    desc['ylabel'] = 'Average cache queue size'
+    # desc['xscale'] = 'log'
+    desc['xparam'] = ('topology', 'n')
+    desc['xvals'] = n
+    desc['filter'] = {'topology': {'name': topology},
+                      # 'workload': {'name': 'STATIONARY_PACKET_LEVEL', 'alpha': alpha}
+                      'workload': {'alpha': alpha},
+                      'cache_placement': {'network_cache': cache_size}}
+    desc['ymetrics'] = [('CACHE_QUEUE', 'Average_queue_size')] * len(strategies)
+    desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
+    desc['ycondvals'] = strategies
+    # desc['metric'] = ('LATENCY', 'MEAN')
+    desc['errorbar'] = True
+    desc['legend_loc'] = 'upper right'
+    desc['line_style'] = STRATEGY_STYLE
+    desc['legend'] = STRATEGY_LEGEND
+    desc['plotempty'] = PLOT_EMPTY_GRAPHS
+    plot_lines(resultset, desc, 'QUEUE_SIZE_T=%s@C=%s@A=%s.pdf'
+               % (topology, cache_size, alpha), plotdir)
 
 def run(config, results, plotdir):
     """Run the plot script
@@ -232,6 +321,8 @@ def run(config, results, plotdir):
     cache_sizes = settings.NETWORK_CACHE
     alphas = settings.ALPHA
     strategies = settings.STRATEGIES
+    n = settings.N
+    # server_processing_rates = settings.SERVER_PROCESSING_RATE
     print(strategies)
     # Plot graphs
     for topology in topologies:
@@ -250,6 +341,19 @@ def run(config, results, plotdir):
             # plot_link_load_vs_cache_size(resultset, topology, alpha, cache_sizes, strategies, plotdir)
             logger.info('Plotting latency for topology %s and alpha %s vs cache size' % (topology, str(alpha)))
             plot_latency_vs_cache_size(resultset, topology, alpha, cache_sizes, strategies, plotdir)
+
+    for topology in topologies:
+        for cache_size in cache_sizes:
+            for alpha in alphas:
+                # logger.info('Plotting cache hit ratio for topology %s cache size %s alpha %s vs server processing rate' % (topology, str(cache_size), str(alpha)))
+                # plot_cache_hits_vs_server_processing_rate(resultset, topology, cache_size, alpha, server_processing_rates, strategies, plotdir)
+                # logger.info('Plotting latency for topology %s cache size %s alpha %s vs server processing rate' % (topology, str(cache_size), str(alpha)))
+                # plot_latency_vs_server_processing_rate(resultset, topology, cache_size, alpha, server_processing_rates, strategies, plotdir)
+                logger.info('Plotting number of packet arriving at a busy node')
+                plot_rejected(resultset, topology, alpha, cache_size, n, strategies, plotdir)
+                logger.info('Plotting average cache queue size')
+                plot_cache_queue_size(resultset, topology, alpha, cache_size, n, strategies, plotdir)
+
     for cache_size in cache_sizes:
         for alpha in alphas:
             logger.info('Plotting cache hit ratio for cache size %s vs alpha %s against topologies' % (str(cache_size), str(alpha)))

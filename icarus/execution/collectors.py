@@ -11,6 +11,7 @@ inheriting from the `DataCollector` class and override all required methods.
 """
 from __future__ import division
 import collections
+import numpy as np
 from matplotlib import pyplot as plt
 
 from icarus.registry import register_data_collector
@@ -25,7 +26,8 @@ __all__ = [
     'LinkLoadCollector',
     'LatencyCollector',
     'PathStretchCollector',
-    'DummyCollector'
+    'DummyCollector',
+    'CacheQueueCollector'
            ]
 
 
@@ -221,8 +223,40 @@ class DataCollector(object):
         main_path : bool, optional
             If *True*, indicates that this link is being tranversed by content
             that will be delivered to the receiver. This is needed to
-            calculate latency correctly in multicast cases. Default value is 
+            calculate latency correctly in multicast cases. Default value is
             *True*
+        """
+        pass
+
+    def record_pkt_rejected(self, node, pkt_type, main_path=True):
+        """This function collects the number of request/data
+        arrives at a 'busy' node.
+
+        Parameters:
+        -----------
+        node: Busy node
+        pkt_type: Arriving packet type, request or data
+        """
+        pass
+
+    def record_pkt_admitted(self, node, pkt_type, main_path=True):
+        """This function collects the number of request/data
+        admitted by node.
+
+        Parameters:
+        -----------
+        node: nodeID
+        pkt_type: Arriving packet type, request or data
+        """
+        pass
+
+    def report_cache_queue_size(self, node, pkt_type, main_path=True):
+        """Report cache queue size when admit a request/data.
+
+        Parameters:
+        -----------
+        node: nodeID
+        pkt_type: Arriving packet type, request or data
         """
         pass
 
@@ -286,7 +320,9 @@ class CollectorProxy(DataCollector):
     dispatching events of interests to concrete collectors.
     """
 
-    EVENTS = ('start_session', 'start_flow_session', 'end_session', 'end_flow_session', 'cache_operation_flow','cache_hit', 'cache_hit_flow', 'cache_miss', 'cache_miss_flow', 'server_hit', 'server_hit_flow', 'request_hop', 'request_hop_flow', 'content_hop', 'content_hop_flow','results')
+    EVENTS = ('start_session', 'start_flow_session', 'end_session', 'end_flow_session', 'cache_operation_flow', 'cache_hit', 'cache_hit_flow',
+              'cache_miss', 'cache_miss_flow', 'server_hit', 'server_hit_flow', 'request_hop', 'request_hop_flow', 'content_hop', 'content_hop_flow',
+              'record_pkt_rejected', 'record_pkt_admitted', 'report_cache_queue_size', 'results')
 
     def __init__(self, view, collectors):
         """Constructor
@@ -366,6 +402,21 @@ class CollectorProxy(DataCollector):
     def cache_operation_flow(self, node, flow, main_path=True):
         for c in self.collectors['cache_operation_flow']:
             c.cache_operation_flow(node, flow, main_path)
+
+    @inheritdoc(DataCollector)
+    def record_pkt_rejected(self, node, pkt_type, main_path=True):
+        for c in self.collectors['record_pkt_rejected']:
+            c.record_pkt_rejected(node, pkt_type, main_path)
+
+    @inheritdoc(DataCollector)
+    def record_pkt_admitted(self, node, pkt_type, main_path=True):
+        for c in self.collectors['record_pkt_admitted']:
+            c.record_pkt_admitted(node, pkt_type, main_path)
+
+    @inheritdoc(DataCollector)
+    def report_cache_queue_size(self, node, pkt_type, main_path=True):
+        for c in self.collectors['report_cache_queue_size']:
+            c.report_cache_queue_size(node, pkt_type, main_path)
 
     @inheritdoc(DataCollector)
     def end_session(self, success=True):
@@ -476,7 +527,7 @@ class LatencyCollector(DataCollector):
 
         self.sess_latency_flow = {}
         self.cache_delay_penalty_flow = {}
-        self.cache_queue_length = {}
+        self.cache_queue_length = []
         
 
     @inheritdoc(DataCollector)
@@ -489,8 +540,6 @@ class LatencyCollector(DataCollector):
         self.sess_count += 1
         self.sess_latency_flow[flow] = 0.0
         self.cache_delay_penalty_flow[flow] = 0.0
-        # if node not in self.cache_queue_length:
-            # self.cache_queue_length[node] = []
 
     @inheritdoc(DataCollector)
     def request_hop(self, u, v, main_path=True):
@@ -518,9 +567,6 @@ class LatencyCollector(DataCollector):
         if main_path:
             self.cache_delay_penalty_flow[flow] += queue_delay
 
-    def cache_queue_length(self, node, main_path=True):
-        if main_path:
-            self.cache_queue_length[node].append(len(self.view.cacheQ_node(node)))
 
     @inheritdoc(DataCollector)
     def end_session(self, success=True):
@@ -551,9 +597,13 @@ class LatencyCollector(DataCollector):
     @inheritdoc(DataCollector)
     def results(self):
         results = Tree({'MEAN': self.latency / self.sess_count})
+        # plt.plot(self.cache_queue_length)
+        # plt.savefig('cache_queue_length_plot.jpg')
+        # plt.show()
         if self.cdf:
             results['CDF'] = cdf(self.latency_data)
         return results
+
 
 @register_data_collector('CACHE_HIT_RATIO')
 class CacheHitRatioCollector(DataCollector):
@@ -811,3 +861,141 @@ class DummyCollector(DataCollector):
             Summary of session
         """
         return self.session
+
+
+
+@register_data_collector('CACHE_QUEUE')
+class CacheQueueCollector(DataCollector):
+    """Data collector collects the cache queue information
+
+    Admitted and rejected request/data.
+    """
+
+    def __init__(self, view):
+        """Constructor
+
+        Parameters
+        ----------
+        view : NetworkView
+            The network view instance
+        """
+        self.view = view
+        self.sess_count = 0
+        self.rejected_request = {}
+        self.rejected_data = {}
+        self.admitted_request = {}
+        self.admitted_data = {}
+        self.cache_queue_size_when_request = {}
+        self.cache_queue_size_when_data = {}
+        self.average_cache_queue_size = []
+        self.percentage_of_rejection = []
+
+    @inheritdoc(DataCollector)
+    def start_session(self, timestamp, receiver, content):
+        self.sess_count += 1
+
+    @inheritdoc(DataCollector)
+    def start_flow_session(self, timestamp, receiver, content, flow):
+        self.sess_count += 1
+
+    @inheritdoc(DataCollector)
+    def report_cache_queue_size(self, node, pkt_type, main_path=True):
+        if node not in self.cache_queue_size_when_request:
+            self.cache_queue_size_when_request[node] = []
+        if node not in self.cache_queue_size_when_data:
+            self.cache_queue_size_when_data[node] = []
+        if main_path:
+            if pkt_type == 'Request':
+                self.cache_queue_size_when_request[node].append(len(self.view.cacheQ_node(node)))
+            elif pkt_type == 'Data':
+                self.cache_queue_size_when_data[node].append(len(self.view.cacheQ_node(node)))
+
+    @inheritdoc(DataCollector)
+    def record_pkt_rejected(self, node, pkt_type, main_path=True):
+        if node not in self.rejected_request:
+            self.rejected_request[node] = 0
+        if node not in self.rejected_data:
+            self.rejected_data[node] = 0
+        if node not in self.admitted_request:
+            self.admitted_request[node] = 0
+        if node not in self.admitted_data:
+            self.admitted_data[node] = 0
+        if main_path:
+            if pkt_type == 'Request':
+                self.rejected_request[node] += 1
+            elif pkt_type == 'Data':
+                self.rejected_data[node] += 1
+
+    @inheritdoc(DataCollector)
+    def record_pkt_admitted(self, node, pkt_type, main_path=True):
+        if node not in self.admitted_request:
+            self.admitted_request[node] = 0
+        if node not in self.admitted_data:
+            self.admitted_data[node] = 0
+        if node not in self.rejected_request:
+            self.rejected_request[node] = 0
+        if node not in self.rejected_data:
+            self.rejected_data[node] = 0
+        if main_path:
+            if pkt_type == 'Request':
+                self.admitted_request[node] += 1
+            elif pkt_type == 'Data':
+                self.admitted_data[node] += 1
+
+
+    @inheritdoc(DataCollector)
+    def results(self):
+        # convert per node dictionary information into lists,
+        # four lists
+        rejected_request = [0]
+        for node in self.rejected_request:
+            while len(rejected_request) <= node:
+                rejected_request.append(0)
+        for node in self.rejected_request:
+            rejected_request[node] = self.rejected_request[node]
+        rejected_data = [0]
+        for node in self.rejected_data:
+            while len(rejected_data) <= node:
+                rejected_data.append(0)
+        for node in self.rejected_data:
+            rejected_data[node] = self.rejected_data[node]
+        admitted_request = [0]
+        for node in self.admitted_request:
+            while len(admitted_request) <= node:
+                admitted_request.append(0)
+        for node in self.admitted_request:
+            admitted_request[node] = self.admitted_request[node]
+        admitted_data = [0]
+        for node in self.admitted_data:
+            while len(admitted_data) <= node:
+                admitted_data.append(0)
+        for node in self.admitted_data:
+            admitted_data[node] = self.admitted_data[node]
+
+        # percentage of rejected data
+        for node in self.admitted_data:
+            while len(self.percentage_of_rejection) <= node:
+                self.percentage_of_rejection.append(0)
+        for node in self.admitted_data:
+            rejected = self.rejected_request[node] + self.rejected_data[node]
+            admitted = self.admitted_request[node] + self.admitted_data[node]
+            self.percentage_of_rejection[node] = rejected / (admitted + rejected)
+
+        # average queue length per node
+        for node in self.cache_queue_size_when_data:
+            while len(self.average_cache_queue_size) <= node:
+                self.average_cache_queue_size.append(0)
+        for node in self.cache_queue_size_when_data:
+            queue_length = self.cache_queue_size_when_request[node] + self.cache_queue_size_when_data[node]
+            self.average_cache_queue_size[node] = np.mean(queue_length)
+
+
+        # plt.title('Average cache queue size')
+        # plt.plot(self.average_cache_queue_size)
+        # plt.xlabel('node')
+        # plt.ylabel('queue size')
+        # plt.savefig('Average_cache_queue_size.png')
+
+
+        results = Tree({'Average_queue_size': self.average_cache_queue_size, 'Percentage_of_rejection': self.percentage_of_rejection})
+        return results

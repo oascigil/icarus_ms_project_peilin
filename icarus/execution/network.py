@@ -16,7 +16,7 @@ import logging
 
 import networkx as nx
 import fnss
-import time
+import math
 import heapq
 
 from icarus.registry import CACHE_POLICY
@@ -132,6 +132,7 @@ class NetworkView(object):
             List of nodes of the shortest path (origin and destination
             included)
         """
+        # print('shortest path', s, t)
         return self.model.shortest_path[s][t]
 
     def all_pairs_shortest_paths(self):
@@ -220,31 +221,34 @@ class NetworkView(object):
         delay = 0
         if server == None and cacheQ == []:
             delay = 0
-            t_event = time + delay
+            queue_delay = delay
         elif server == None and cacheQ != []:
-            event = heapq.nlargest(1, cacheQ)
-            event = event[0][1]
-            if event['pkt_type'] == 'get_content':
-                delay += read_delay_penalty
-            elif event['pkt_type'] == 'put_content:':
-                delay += write_delay_penalty
-            t_event = event['t_event'] + delay
+            for event in cacheQ:
+                event = event[1]
+                if event['pkt_type'] == 'get_content':
+                    delay += read_delay_penalty
+                elif event['pkt_type'] == 'put_content:':
+                    delay += write_delay_penalty
+            queue_delay = delay
         elif server != None and cacheQ == []:
             # server delay
             if server['pkt_type'] == 'get_content':
                 delay += read_delay_penalty
             elif server['pkt_type'] == 'put_content:':
                 delay += write_delay_penalty
-            t_event = server['t_event'] + delay
+            queue_delay = math.ceil(server['t_event'] + delay - time)
         else:
-            event = heapq.nlargest(1, cacheQ)
-            event = event[0][1]
-            if event['pkt_type'] == 'get_content':
+            if server['pkt_type'] == 'get_content':
                 delay += read_delay_penalty
-            elif event['pkt_type'] == 'put_content':
+            elif server['pkt_type'] == 'put_content':
                 delay += write_delay_penalty
-            t_event = event['t_event'] + delay
-        queue_delay = t_event - time
+            for event in cacheQ:
+                event = event[1]
+                if event['pkt_type'] == 'get_content':
+                    delay += read_delay_penalty
+                elif event['pkt_type'] == 'put_content':
+                    delay += write_delay_penalty
+            queue_delay = math.ceil(server['t_event'] + delay - time)
         if queue_delay < 0:
             queue_delay = 0
         return queue_delay
@@ -571,9 +575,9 @@ class NetworkModel(object):
         self.cacheQ = {}
         self.server = {}
         # self.cacheQ_length = [[],[]]
-        self.read_delay_penalty = 10
-        self.write_delay_penalty = 10
-        self.cacheQ_size = 10 ** 2
+        self.read_delay_penalty = 100
+        self.write_delay_penalty = 100
+        self.cacheQ_size = 10
 
         # LCD packet level flag indicating content copied or not
         self.lcd_pkt_level_copied_flag = {}
@@ -961,11 +965,29 @@ class NetworkController(object):
         event = self.model.server[node].pop(0)
         return event
 
-    # def record_cache_queue_length(self, node, log, main_path=True):
-    #    """Record the cache queue length of a node.
-    #    """
-    #    if self.collector is not None and log:
-    #        self.collector.cache_queue_length(node, main_path)
+    def record_cache_queue_length(self, log, main_path=True):
+       """Record the cache queue length of a node.
+       """
+       if self.collector is not None and log:
+           self.collector.record_cache_queue_length(main_path)
+
+    def record_pkt_rejected(self, node, pkt_type, log, main_path=True):
+       """Rrecord the number of rejected request/data.
+       """
+       if self.collector is not None and log:
+           self.collector.record_pkt_rejected(node, pkt_type, main_path)
+
+    def record_pkt_admitted(self, node, pkt_type, log, main_path=True):
+       """record the number of admitted request/data.
+       """
+       if self.collector is not None and log:
+           self.collector.record_pkt_admitted(node, pkt_type, main_path)
+
+    def report_cache_queue_size(self, node, pkt_type, log, main_path=True):
+       """Report cache queue size when admit a request/data.
+       """
+       if self.collector is not None and log:
+           self.collector.report_cache_queue_size(node, pkt_type, main_path)
 
     def cache_operation_flow(self, flow, delay, log, main_path=True):
         """Write a content to cache or read a content from cache.

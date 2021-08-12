@@ -21,6 +21,7 @@ import random
 import csv
 
 import networkx as nx
+import numpy as np
 
 from icarus.tools import TruncatedZipfDist
 from icarus.registry import register_workload
@@ -131,7 +132,7 @@ class StationaryPacketLevelWorkload(object):
                 receiver = random.choice(self.receivers)
             else:
                 receiver = self.receivers[self.receiver_dist.rv() - 1]
-            content = int(self.zipf.rv(self.n_contents))
+            content = int(self.zipf.rv())
             log = (flow_counter >= self.n_warmup)
             event = {'receiver': receiver, 'content': content, 'node': receiver, 'flow': flow_counter, 'pkt_type': 'Request', 'log': log}
             # print('flow counter: ', flow_counter, 't_next_flow', t_next_flow, 'event:', event)
@@ -189,8 +190,8 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
         dictionary of event attributes.
     """
     def __init__(self, topology, n_contents, alpha, # server_processing_rate,
-                    beta=0, rate=1.0, n_warmup=10 ** 5, n_measured=4 * 10 ** 5, read_delay_penalty=10,
-                    write_delay_penalty=10, cache_queue_size=10**2, seed=None, **kwargs):
+                    beta=0, rate=1.0, n_warmup=10 ** 5, n_measured=4 * 10 ** 5, read_delay_penalty=100,
+                    write_delay_penalty=100, cache_queue_size=10, seed=None, **kwargs):
         if alpha < 0:
             raise ValueError('alpha must be positive')
         if beta < 0:
@@ -199,7 +200,7 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
                      if topology.node[v]['stack'][0] == 'receiver']
         self.zipf = TruncatedZipfDist(alpha, n_contents)
         self.n_contents = n_contents
-        self.contents = range(1, n_contents + 1)
+        self.contents = list(range(1, n_contents + 1))
         self.alpha = alpha
         self.rate = rate
         self.n_warmup = n_warmup
@@ -279,7 +280,10 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
                 receiver = random.choice(self.receivers)
             else:
                 receiver = self.receivers[self.receiver_dist.rv() - 1]
-            content = int(self.zipf.rv(self.n_contents))
+            content = int(self.zipf.rv())
+            if flow_counter % 100 == 0:
+                random.shuffle(self.contents)
+            content = self.contents.index(content) + 1
             log = (flow_counter >= self.n_warmup)
             event = {'receiver': receiver, 'content': content, 'node': receiver, 'flow': flow_counter, 'pkt_type': 'Request', 'log': log}
             # print('flow counter: ', flow_counter, 't_next_flow', t_next_flow, 'event:', event)
