@@ -114,7 +114,7 @@ def largest_connected_component_subgraph(topology):
 
 
 @register_topology_factory('TREE')
-def topology_tree(k, h, delay=1, **kwargs):
+def topology_tree(k, h, delay=1, delay_ext=100, **kwargs):
     """Returns a tree topology, with a source at the root, receivers at the
     leafs and caches at all intermediate nodes.
 
@@ -153,6 +153,10 @@ def topology_tree(k, h, delay=1, **kwargs):
     # label links as internal
     for u, v in topology.edges():
         topology.adj[u][v]['type'] = 'internal'
+    external_links = [(sources[0], routers[0]), (sources[0], routers[1])]
+    for u, v in external_links:
+        topology.add_edge(u, v, type='external')
+        fnss.set_delays_constant(topology, delay_ext, 'ms', external_links)
     return IcnTopology(topology)
 
 

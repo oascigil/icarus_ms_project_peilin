@@ -48,30 +48,33 @@ DATA_COLLECTORS = ['CACHE_HIT_RATIO', 'LATENCY', 'CACHE_QUEUE']
 # This would give problems while trying to plot the results because if for
 # example I wanted to filter experiment with alpha=0.8, experiments with
 # alpha = 0.799999999999 would not be recognized
-# ALPHA = [0.1, 0.4, 0.8, 1, 1.2, 1.6, 2, 2.8]
-ALPHA = [1]
+ALPHA = [0.01, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 1.4]
+# ALPHA = [0.1]
 
 # Total size of network cache as a fraction of content population
-NETWORK_CACHE = [0.004, 0.01, 0.05, 0.1, 0.3, 0.5]
-# NETWORK_CACHE = [0.1]
+# NETWORK_CACHE = [0.004, 0.01, 0.05, 0.1, 0.3, 0.5]
+NETWORK_CACHE = [0.1]
 
 # Number of content objects
-N_CONTENTS = 3 * 10 ** 4
+N_CONTENTS = 10 ** 3
 
 # Number of requests per millisecond (over the whole network)
 # The value 0.01 roughly represents 10 requests per second
-NETWORK_REQUEST_RATE = 0.01
+# The value 0.04 roughly represents 40 requests per second
+NETWORK_REQUEST_RATE = 0.04
 
 # Number of content requests generated to prepopulate the caches
 # These requests are not logged
-N_WARMUP_REQUESTS = 3 * 10 ** 4
+N_WARMUP_REQUESTS = 5 * 10 ** 4
 
 # Number of content requests generated after the warmup and logged
 # to generate results.
-N_MEASURED_REQUESTS = 6 * 10 ** 4
+N_MEASURED_REQUESTS = 10 ** 5
 
-READ_DELAY_PENALTY = 1/NETWORK_REQUEST_RATE
-WRITE_DELAY_PENALTY = 1/NETWORK_REQUEST_RATE
+# READ_DELAY_PENALTY = 1/NETWORK_REQUEST_RATE
+# WRITE_DELAY_PENALTY = 1/NETWORK_REQUEST_RATE
+READ_DELAY_PENALTY = 100
+WRITE_DELAY_PENALTY = 100
 # SERVER_PROCESSING_RATE = [16, 13, 10, 7, 4]
 # READ_DELAY_PENALTY = [1000/16, 1000/13, 1000/10, 1000/7, 1000/4]
 # WRITE_DELAY_PENALTY = [1000/16, 1000/13, 1000/10, 1000/7, 1000/4]
@@ -84,15 +87,18 @@ CACHE_QUEUE_SIZE = 10
 
 
 STRATEGIES1 = [
-     'PROB_CACHE_PKT_LEVEL',  # ProbCache packet level cache delay
-     'LCE_PKT_LEVEL',  # Leave Copy Everywhere
+     # 'PROB_CACHE_PKT_LEVEL',  # ProbCache packet level cache delay
+     # 'LCE_PKT_LEVEL',  # Leave Copy Everywhere
      # 'NO_CACHE',  # No caching, shorest-path routing
-     'LCD_PKT_LEVEL'  # Leave Copy Down
+     # 'LCD_PKT_LEVEL'  # Leave Copy Down
               ]
 STRATEGIES2= [
         'PROB_CACHE_PL_CD',
         'LCE_PL_CD',
-        'LCD_PL_CD'
+        'LCD_PL_CD',
+        'PROB_CACHE_AVOID_BUSY_NODE',
+        'LCE_AVOID_BUSY_NODE',
+        'LCD_AVOID_BUSY_NODE'
         ]
 
 STRATEGIES = STRATEGIES1 + STRATEGIES2
@@ -118,16 +124,15 @@ default['content_placement']['name'] = 'UNIFORM'
 default['cache_policy']['name'] = CACHE_POLICY
 
 # Set topology
-n = 6
-default['topology']['name'] = 'PATH'
-default['topology']['n'] = n
+default['topology']['name'] = 'TREE'
+default['topology']['k'] = 4
+default['topology']['h'] = 2
 # default['topology']['delay'] = 1
 # List of all implemented topologies
 # Topology implementations are located in ./icarus/scenarios/topology.py
 TOPOLOGIES = [
-        'PATH'
+        'TREE'
               ]
-N = list(range(0, n))
 
 # Create experiments multiplexing all desired parameters
 for alpha in ALPHA:

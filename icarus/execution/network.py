@@ -253,6 +253,14 @@ class NetworkView(object):
             queue_delay = 0
         return queue_delay
 
+    def track_busy_node(self, flow):
+        """Track the cache queue size to avoid caching in busy node..
+        """
+        if flow in self.model.track_busy_node:
+            return self.model.track_busy_node[flow]
+        else:
+            return []
+
 
     def cluster(self, v):
         """Return cluster to which a node belongs, if any
@@ -578,6 +586,7 @@ class NetworkModel(object):
         self.read_delay_penalty = 100
         self.write_delay_penalty = 100
         self.cacheQ_size = 10
+        self.track_busy_node = {}
 
         # LCD packet level flag indicating content copied or not
         self.lcd_pkt_level_copied_flag = {}
@@ -965,29 +974,23 @@ class NetworkController(object):
         event = self.model.server[node].pop(0)
         return event
 
-    def record_cache_queue_length(self, log, main_path=True):
-       """Record the cache queue length of a node.
-       """
-       if self.collector is not None and log:
-           self.collector.record_cache_queue_length(main_path)
-
-    def record_pkt_rejected(self, node, pkt_type, log, main_path=True):
+    def record_pkt_rejected(self, node, pkt_type, log):
        """Rrecord the number of rejected request/data.
        """
        if self.collector is not None and log:
-           self.collector.record_pkt_rejected(node, pkt_type, main_path)
+           self.collector.record_pkt_rejected(node, pkt_type)
 
-    def record_pkt_admitted(self, node, pkt_type, log, main_path=True):
+    def record_pkt_admitted(self, node, pkt_type, log):
        """record the number of admitted request/data.
        """
        if self.collector is not None and log:
-           self.collector.record_pkt_admitted(node, pkt_type, main_path)
+           self.collector.record_pkt_admitted(node, pkt_type)
 
-    def report_cache_queue_size(self, node, pkt_type, log, main_path=True):
+    def report_cache_queue_size(self, node, pkt_type, log):
        """Report cache queue size when admit a request/data.
        """
        if self.collector is not None and log:
-           self.collector.report_cache_queue_size(node, pkt_type, main_path)
+           self.collector.report_cache_queue_size(node, pkt_type)
 
     def cache_operation_flow(self, flow, delay, log, main_path=True):
         """Write a content to cache or read a content from cache.
@@ -1003,6 +1006,14 @@ class NetworkController(object):
         # print('cache_operation_flow')
         if self.collector is not None and log:
             self.collector.cache_operation_flow(flow, delay, main_path)
+
+    def track_busy_node(self, flow, node, log):
+        """Track the cache queue size to avoid caching in busy node..
+        """
+        if self.collector is not None and log:
+            if flow not in self.model.track_busy_node:
+                self.model.track_busy_node[flow] = []
+            self.model.track_busy_node[flow].append(node)
 
     # set cache operations delay penalty
     def set_read_delay_penalty(self, delay):

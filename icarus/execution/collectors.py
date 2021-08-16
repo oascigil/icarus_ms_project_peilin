@@ -228,7 +228,7 @@ class DataCollector(object):
         """
         pass
 
-    def record_pkt_rejected(self, node, pkt_type, main_path=True):
+    def record_pkt_rejected(self, node, pkt_type):
         """This function collects the number of request/data
         arrives at a 'busy' node.
 
@@ -239,7 +239,7 @@ class DataCollector(object):
         """
         pass
 
-    def record_pkt_admitted(self, node, pkt_type, main_path=True):
+    def record_pkt_admitted(self, node, pkt_type):
         """This function collects the number of request/data
         admitted by node.
 
@@ -250,7 +250,7 @@ class DataCollector(object):
         """
         pass
 
-    def report_cache_queue_size(self, node, pkt_type, main_path=True):
+    def report_cache_queue_size(self, node, pkt_type):
         """Report cache queue size when admit a request/data.
 
         Parameters:
@@ -404,19 +404,19 @@ class CollectorProxy(DataCollector):
             c.cache_operation_flow(node, flow, main_path)
 
     @inheritdoc(DataCollector)
-    def record_pkt_rejected(self, node, pkt_type, main_path=True):
+    def record_pkt_rejected(self, node, pkt_type):
         for c in self.collectors['record_pkt_rejected']:
-            c.record_pkt_rejected(node, pkt_type, main_path)
+            c.record_pkt_rejected(node, pkt_type)
 
     @inheritdoc(DataCollector)
-    def record_pkt_admitted(self, node, pkt_type, main_path=True):
+    def record_pkt_admitted(self, node, pkt_type):
         for c in self.collectors['record_pkt_admitted']:
-            c.record_pkt_admitted(node, pkt_type, main_path)
+            c.record_pkt_admitted(node, pkt_type)
 
     @inheritdoc(DataCollector)
-    def report_cache_queue_size(self, node, pkt_type, main_path=True):
+    def report_cache_queue_size(self, node, pkt_type):
         for c in self.collectors['report_cache_queue_size']:
-            c.report_cache_queue_size(node, pkt_type, main_path)
+            c.report_cache_queue_size(node, pkt_type)
 
     @inheritdoc(DataCollector)
     def end_session(self, success=True):
@@ -597,9 +597,6 @@ class LatencyCollector(DataCollector):
     @inheritdoc(DataCollector)
     def results(self):
         results = Tree({'MEAN': self.latency / self.sess_count})
-        # plt.plot(self.cache_queue_length)
-        # plt.savefig('cache_queue_length_plot.jpg')
-        # plt.show()
         if self.cdf:
             results['CDF'] = cdf(self.latency_data)
         return results
@@ -889,6 +886,8 @@ class CacheQueueCollector(DataCollector):
         self.cache_queue_size_when_data = {}
         self.average_cache_queue_size = []
         self.percentage_of_rejection = []
+        self.percentage_of_request_rejection = []
+        self.percentage_of_data_rejection = []
 
     @inheritdoc(DataCollector)
     def start_session(self, timestamp, receiver, content):
@@ -899,35 +898,18 @@ class CacheQueueCollector(DataCollector):
         self.sess_count += 1
 
     @inheritdoc(DataCollector)
-    def report_cache_queue_size(self, node, pkt_type, main_path=True):
+    def report_cache_queue_size(self, node, pkt_type):
         if node not in self.cache_queue_size_when_request:
             self.cache_queue_size_when_request[node] = []
         if node not in self.cache_queue_size_when_data:
             self.cache_queue_size_when_data[node] = []
-        if main_path:
-            if pkt_type == 'Request':
-                self.cache_queue_size_when_request[node].append(len(self.view.cacheQ_node(node)))
-            elif pkt_type == 'Data':
-                self.cache_queue_size_when_data[node].append(len(self.view.cacheQ_node(node)))
+        if pkt_type == 'Request':
+            self.cache_queue_size_when_request[node].append(len(self.view.cacheQ_node(node)))
+        elif pkt_type == 'Data':
+            self.cache_queue_size_when_data[node].append(len(self.view.cacheQ_node(node)))
 
     @inheritdoc(DataCollector)
-    def record_pkt_rejected(self, node, pkt_type, main_path=True):
-        if node not in self.rejected_request:
-            self.rejected_request[node] = 0
-        if node not in self.rejected_data:
-            self.rejected_data[node] = 0
-        if node not in self.admitted_request:
-            self.admitted_request[node] = 0
-        if node not in self.admitted_data:
-            self.admitted_data[node] = 0
-        if main_path:
-            if pkt_type == 'Request':
-                self.rejected_request[node] += 1
-            elif pkt_type == 'Data':
-                self.rejected_data[node] += 1
-
-    @inheritdoc(DataCollector)
-    def record_pkt_admitted(self, node, pkt_type, main_path=True):
+    def record_pkt_rejected(self, node, pkt_type):
         if node not in self.admitted_request:
             self.admitted_request[node] = 0
         if node not in self.admitted_data:
@@ -936,59 +918,53 @@ class CacheQueueCollector(DataCollector):
             self.rejected_request[node] = 0
         if node not in self.rejected_data:
             self.rejected_data[node] = 0
-        if main_path:
-            if pkt_type == 'Request':
-                self.admitted_request[node] += 1
-            elif pkt_type == 'Data':
-                self.admitted_data[node] += 1
+        if pkt_type == 'Request':
+            self.rejected_request[node] += 1
+        elif pkt_type == 'Data':
+            self.rejected_data[node] += 1
+
+    @inheritdoc(DataCollector)
+    def record_pkt_admitted(self, node, pkt_type):
+        if node not in self.admitted_request:
+            self.admitted_request[node] = 0
+        if node not in self.admitted_data:
+            self.admitted_data[node] = 0
+        if node not in self.rejected_request:
+            self.rejected_request[node] = 0
+        if node not in self.rejected_data:
+            self.rejected_data[node] = 0
+        if pkt_type == 'Request':
+            self.admitted_request[node] += 1
+        elif pkt_type == 'Data':
+            self.admitted_data[node] += 1
 
 
     @inheritdoc(DataCollector)
     def results(self):
-        # convert per node dictionary information into lists,
-        # four lists
-        rejected_request = [0]
-        for node in self.rejected_request:
-            while len(rejected_request) <= node:
-                rejected_request.append(0)
-        for node in self.rejected_request:
-            rejected_request[node] = self.rejected_request[node]
-        rejected_data = [0]
-        for node in self.rejected_data:
-            while len(rejected_data) <= node:
-                rejected_data.append(0)
-        for node in self.rejected_data:
-            rejected_data[node] = self.rejected_data[node]
-        admitted_request = [0]
-        for node in self.admitted_request:
-            while len(admitted_request) <= node:
-                admitted_request.append(0)
-        for node in self.admitted_request:
-            admitted_request[node] = self.admitted_request[node]
-        admitted_data = [0]
-        for node in self.admitted_data:
-            while len(admitted_data) <= node:
-                admitted_data.append(0)
-        for node in self.admitted_data:
-            admitted_data[node] = self.admitted_data[node]
-
         # percentage of rejected data
         for node in self.admitted_data:
             while len(self.percentage_of_rejection) <= node:
                 self.percentage_of_rejection.append(0)
-        for node in self.admitted_data:
+            while len(self.percentage_of_request_rejection) <= node:
+                self.percentage_of_request_rejection.append(0)
+            while len(self.percentage_of_data_rejection) <= node:
+                self.percentage_of_data_rejection.append(0)
+
             rejected = self.rejected_request[node] + self.rejected_data[node]
             admitted = self.admitted_request[node] + self.admitted_data[node]
+            request = self.rejected_request[node] + self.admitted_request[node]
+            data = self.rejected_data[node] + self.admitted_data[node]
+            
             self.percentage_of_rejection[node] = rejected / (admitted + rejected)
+            self.percentage_of_request_rejection[node] = self.rejected_request[node] / request
+            self.percentage_of_data_rejection[node] = self.rejected_data[node] / data
 
         # average queue length per node
         for node in self.cache_queue_size_when_data:
             while len(self.average_cache_queue_size) <= node:
                 self.average_cache_queue_size.append(0)
-        for node in self.cache_queue_size_when_data:
             queue_length = self.cache_queue_size_when_request[node] + self.cache_queue_size_when_data[node]
             self.average_cache_queue_size[node] = np.mean(queue_length)
-
 
         # plt.title('Average cache queue size')
         # plt.plot(self.average_cache_queue_size)
@@ -996,6 +972,8 @@ class CacheQueueCollector(DataCollector):
         # plt.ylabel('queue size')
         # plt.savefig('Average_cache_queue_size.png')
 
-
-        results = Tree({'Average_queue_size': self.average_cache_queue_size, 'Percentage_of_rejection': self.percentage_of_rejection})
+        results = Tree({'AVERAGE_QUEUE_SIZE': self.average_cache_queue_size,
+                        'PERCENTAGE_OF_REJECTION': self.percentage_of_rejection,
+                        'PERCENTAGE_OF_REQUEST_REJECTION': self.percentage_of_request_rejection,
+                        'PERCENTAGE_OF_DATA_REJECTION': self.percentage_of_data_rejection})
         return results
