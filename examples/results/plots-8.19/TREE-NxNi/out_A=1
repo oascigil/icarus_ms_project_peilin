@@ -1,0 +1,529 @@
+EXPERIMENT 1/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.004
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_PL_CD
+   * desc -> Alpha: 1, strategy: PROB_CACHE_PL_CD, topology: TREE, network cache: 0.004
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.03126
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.00796, 4: 0.00765, 2: 0.00777, 3: 0.00788})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.96874})
+    LATENCY
+     * MEAN: 100.38103
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.0242311276794036, 1.0279453794855509, 1.007682851874616, 1.0086510733739187]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 2/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.01
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_PL_CD
+   * desc -> Alpha: 1, strategy: PROB_CACHE_PL_CD, topology: TREE, network cache: 0.01
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.06873
+     * PER_NODE_CACHE_HIT_RATIO: Tree({3: 0.01736, 4: 0.01645, 2: 0.01742, 1: 0.0175})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.93127})
+    LATENCY
+     * MEAN: 97.01579
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.0279343298211223, 1.0352825067850975, 1.016650579150579, 1.017579105976896]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 3/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.05
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_PL_CD
+   * desc -> Alpha: 1, strategy: PROB_CACHE_PL_CD, topology: TREE, network cache: 0.05
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.31483
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.07791, 2: 0.07942, 3: 0.07927, 4: 0.07823})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.68517})
+    LATENCY
+     * MEAN: 81.07379
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.1070384294068505, 1.1221334440178479, 1.107393638992152, 1.1005714285714285]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 4/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.1
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_PL_CD
+   * desc -> Alpha: 1, strategy: PROB_CACHE_PL_CD, topology: TREE, network cache: 0.1
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.42465
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.10489, 2: 0.10807, 4: 0.10592, 3: 0.10577})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.57535})
+    LATENCY
+     * MEAN: 80.08407
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.1998324256388773, 1.224240449621243, 1.192294890996838, 1.2069279854147676]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 5/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.3
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_PL_CD
+   * desc -> Alpha: 1, strategy: PROB_CACHE_PL_CD, topology: TREE, network cache: 0.3
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.592110394480276
+     * PER_NODE_CACHE_HIT_RATIO: Tree({2: 0.14709264536773162, 3: 0.1486725663716814, 4: 0.14903254837258137, 1: 0.1473126343682816})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.40788960551972403})
+    LATENCY
+     * MEAN: 95.17049
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.5162088434942587, 1.5334563032693043, 1.5056434831956618, 1.5115271059739934]
+     * PERCENTAGE_OF_REJECTION: [0, 0.00012686330478908975, 0.00019077901430842608, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.00013575889220743959, 0.00020394289598912304, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 6/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.5
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_PL_CD
+   * desc -> Alpha: 1, strategy: PROB_CACHE_PL_CD, topology: TREE, network cache: 0.5
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.6693929789127413
+     * PER_NODE_CACHE_HIT_RATIO: Tree({3: 0.1664583604131463, 1: 0.16665833441652586, 4: 0.16762820833291672, 2: 0.16864807575015248})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.33060702108725865})
+    LATENCY
+     * MEAN: 118.0792
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.8133867276887872, 1.8617587143503849, 1.7925608011444922, 1.8601374765664944]
+     * PERCENTAGE_OF_REJECTION: [0, 0.00028595939376608524, 0.00016973125884016973, 5.722133211261158e-05, 0.00028396183552930487]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0002999760019198464, 0.00017786209758700422, 6.00672753483902e-05, 0.00023859230539815092]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0011862396204033216]
+
+EXPERIMENT 7/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.004
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCE_PL_CD
+   * desc -> Alpha: 1, strategy: LCE_PL_CD, topology: TREE, network cache: 0.004
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.02815085741695647
+     * PER_NODE_CACHE_HIT_RATIO: Tree({2: 0.0067753927329416, 3: 0.007404964624055642, 1: 0.006515569412799296, 4: 0.007454930647159931})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.9718491425830436})
+    LATENCY
+     * MEAN: 366.62114
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.01113242161441, 4.32813663055165, 2.811508502915868, 2.872063298843579]
+     * PERCENTAGE_OF_REJECTION: [0, 0.029380817482800487, 0.038641965492565794, 0.01825679625255235, 0.023070519681293852]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.027607361963190184, 0.03982300884955752, 0.010796221322537112, 0.020107238605898123]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.029428880206168427, 0.03860924987743095, 0.018484898498101997, 0.023160818594011683]
+
+EXPERIMENT 8/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.01
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCE_PL_CD
+   * desc -> Alpha: 1, strategy: LCE_PL_CD, topology: TREE, network cache: 0.01
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.05336408382504168
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.012929184013737882, 4: 0.013777817713481294, 2: 0.012869280458461876, 3: 0.01378780163936063})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.9466359161749583})
+    LATENCY
+     * MEAN: 390.1845
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.47587601634405, 4.134842642119667, 2.9116654317938586, 3.454656662860871]
+     * PERCENTAGE_OF_REJECTION: [0, 0.036888341217156256, 0.031056649256729612, 0.023199710506212053, 0.02848314384185715]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.036293436293436294, 0.03413498836307215, 0.020999275887038378, 0.029710144927536233]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.036920626938228146, 0.030888521672810473, 0.02332907620263942, 0.02841218622972803]
+
+EXPERIMENT 9/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.05
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCE_PL_CD
+   * desc -> Alpha: 1, strategy: LCE_PL_CD, topology: TREE, network cache: 0.05
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.2277343479079353
+     * PER_NODE_CACHE_HIT_RATIO: Tree({4: 0.058338039612004476, 3: 0.0564654360986436, 1: 0.05610874971514629, 2: 0.05682212248214091})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.7722656520920648})
+    LATENCY
+     * MEAN: 433.12892
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.491353929089778, 4.51795465828231, 4.019552726220495, 4.131423374261027]
+     * PERCENTAGE_OF_REJECTION: [0, 0.04762845069310059, 0.04382911392405063, 0.03571570933152629, 0.04167822194049364]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.052622285007946315, 0.04394071490845684, 0.03053167222319705, 0.03481657608695652]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.04618984637297792, 0.043796367357380406, 0.03723952960594182, 0.04376582441998657]
+
+EXPERIMENT 10/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.1
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCE_PL_CD
+   * desc -> Alpha: 1, strategy: LCE_PL_CD, topology: TREE, network cache: 0.1
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.3397584193894527
+     * PER_NODE_CACHE_HIT_RATIO: Tree({4: 0.08629566552800229, 1: 0.08427757159311289, 3: 0.08348017837981513, 2: 0.08570500388852247})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.6602415806105473})
+    LATENCY
+     * MEAN: 470.71554
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.939082706141628, 5.034323898065908, 4.468629747364899, 4.632086851628468]
+     * PERCENTAGE_OF_REJECTION: [0, 0.05527184160905091, 0.061175187032418955, 0.045969672785315246, 0.05354119916538719]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.04882607172059339, 0.05662761314036297, 0.036910377358490565, 0.04072553045859001]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.05853802900266351, 0.06350984785941738, 0.05060313630880579, 0.060294559663360385]
+
+EXPERIMENT 11/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.3
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCE_PL_CD
+   * desc -> Alpha: 1, strategy: LCE_PL_CD, topology: TREE, network cache: 0.3
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.5141564179337385
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.12742239084002224, 2: 0.12851472208947362, 3: 0.12872928715633017, 4: 0.1294900178479124})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.4858435820662616})
+    LATENCY
+     * MEAN: 472.85986
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 5.038175280147182, 4.952279825109307, 4.8620617956501855, 4.932304235666139]
+     * PERCENTAGE_OF_REJECTION: [0, 0.06614603670441234, 0.06632712569495743, 0.0620197370987245, 0.059886563661255623]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.05373134328358209, 0.055475449647112395, 0.04212440336389121, 0.040973111395646605]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.07907532881626146, 0.07772640306122448, 0.0831323363884869, 0.080322265625]
+
+EXPERIMENT 12/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.5
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCE_PL_CD
+   * desc -> Alpha: 1, strategy: LCE_PL_CD, topology: TREE, network cache: 0.5
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.5960827933068962
+     * PER_NODE_CACHE_HIT_RATIO: Tree({3: 0.14861205145565334, 1: 0.15123319469968083, 4: 0.1479640197311152, 2: 0.14827352742044686})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.40391720669310377})
+    LATENCY
+     * MEAN: 487.65542
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 5.391166666666667, 5.357641939667796, 5.084603499394496, 4.883435325676921]
+     * PERCENTAGE_OF_REJECTION: [0, 0.08368967623701894, 0.0798105798105798, 0.06915183083262069, 0.06431877009961566]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.06740854438475313, 0.06562296151337248, 0.04594858444516759, 0.040789645705320954]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.10780598711633195, 0.10024426907177753, 0.10356143229418009, 0.0996078431372549]
+
+EXPERIMENT 13/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.004
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCD_PL_CD
+   * desc -> Alpha: 1, strategy: LCD_PL_CD, topology: TREE, network cache: 0.004
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.029185192586301645
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.007233851226457511, 4: 0.007044012589299096, 2: 0.007343757805865015, 3: 0.007563570964680022})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.9708148074136984})
+    LATENCY
+     * MEAN: 370.40304
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.611376177239348, 4.418798826106725, 2.3812236200467156, 2.734548850808089]
+     * PERCENTAGE_OF_REJECTION: [0, 0.03914690053817022, 0.037860409624179754, 0.014458220588829207, 0.018649876464493505]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.05110497237569061, 0.036734693877551024, 0.011889035667107, 0.01702127659574468]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.03879151102171503, 0.03789430561245391, 0.01453924345942343, 0.018696953544630777]
+
+EXPERIMENT 14/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.01
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCD_PL_CD
+   * desc -> Alpha: 1, strategy: LCD_PL_CD, topology: TREE, network cache: 0.01
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.05459861881761207
+     * PER_NODE_CACHE_HIT_RATIO: Tree({4: 0.013761925671629874, 3: 0.013332801085784999, 1: 0.013702047822442219, 2: 0.01380184423775498})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.9454013811823879})
+    LATENCY
+     * MEAN: 402.45675
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.464914466035542, 4.269052490917443, 3.3698338652917585, 3.4073845647794085]
+     * PERCENTAGE_OF_REJECTION: [0, 0.03890817670298097, 0.03761604308162199, 0.03050739873844567, 0.029295549790460985]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.04224326292789512, 0.049891540130151846, 0.027694610778443114, 0.029006526468455404]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.038714852655577135, 0.036893617021276595, 0.03066482342591429, 0.02931238384862308]
+
+EXPERIMENT 15/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.05
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCD_PL_CD
+   * desc -> Alpha: 1, strategy: LCD_PL_CD, topology: TREE, network cache: 0.05
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.2261888243572717
+     * PER_NODE_CACHE_HIT_RATIO: Tree({2: 0.05471862673194711, 3: 0.0573549525263137, 1: 0.05632420860671173, 4: 0.05779103649229916})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.7738111756427283})
+    LATENCY
+     * MEAN: 439.18593
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.412780799734253, 4.354332679711294, 4.235532407407407, 4.462374927644092]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0407854383239734, 0.03916459552633689, 0.046244825547013604, 0.05078492935635793]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.03800809431638219, 0.03640644810722695, 0.039917055469155, 0.04287429257417252]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.04159802306425041, 0.03994851994851995, 0.048115231382163656, 0.0531324749351112]
+
+EXPERIMENT 16/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.1
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCD_PL_CD
+   * desc -> Alpha: 1, strategy: LCD_PL_CD, topology: TREE, network cache: 0.1
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.33949826580482423
+     * PER_NODE_CACHE_HIT_RATIO: Tree({2: 0.08476864259813968, 1: 0.08601016868989438, 4: 0.08475878921645909, 3: 0.08396066530033107})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.6605017341951758})
+    LATENCY
+     * MEAN: 460.70203
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 4.951221535526152, 4.652534294831945, 4.378495882279169, 4.692435370762272]
+     * PERCENTAGE_OF_REJECTION: [0, 0.06026115766907036, 0.0472636815920398, 0.046896167025260976, 0.05155653508599315]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.05487455607744301, 0.04289201441357666, 0.03485506395962915, 0.03987444780283655]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0630391114262082, 0.04951264725228727, 0.05308560053085601, 0.05753555066341405]
+
+EXPERIMENT 17/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.3
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCD_PL_CD
+   * desc -> Alpha: 1, strategy: LCD_PL_CD, topology: TREE, network cache: 0.3
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.5099849835208768
+     * PER_NODE_CACHE_HIT_RATIO: Tree({3: 0.12923923006416133, 2: 0.1279911071240517, 1: 0.12714277356319598, 4: 0.12561187276946778})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.4900150164791232})
+    LATENCY
+     * MEAN: 469.39455
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 5.095621015791009, 5.144886599651076, 4.618637724550898, 4.751315240083508]
+     * PERCENTAGE_OF_REJECTION: [0, 0.06871798851466708, 0.06476049881511985, 0.05649717514124294, 0.062732360192541]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.05997392438070404, 0.05264360810604906, 0.03787535838237513, 0.044946436888681884]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0776721903714757, 0.07736821244550139, 0.07667157103155141, 0.08081445821166443]
+
+EXPERIMENT 18/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.5
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: LCD_PL_CD
+   * desc -> Alpha: 1, strategy: LCD_PL_CD, topology: TREE, network cache: 0.5
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.5931547158122967
+     * PER_NODE_CACHE_HIT_RATIO: Tree({2: 0.14997289763047855, 1: 0.14639151308657272, 3: 0.14716586650147126, 4: 0.1496244385937742})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.40684528418770327})
+    LATENCY
+     * MEAN: 496.06854
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 5.119165339813962, 5.6104697203350975, 5.121856299953969, 5.200392599089504]
+     * PERCENTAGE_OF_REJECTION: [0, 0.06947910168434186, 0.08531889748770538, 0.06968505469692841, 0.07003029596830576]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.05402010050251256, 0.0714470117464825, 0.04604051565377532, 0.044507698279208176]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.09169517293804637, 0.10533668622520256, 0.10397786893064963, 0.1083786936236392]
+
+EXPERIMENT 19/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.004
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_AVOID_BUSY_NODE
+   * desc -> Alpha: 1, strategy: PROB_CACHE_AVOID_BUSY_NODE, topology: TREE, network cache: 0.004
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.02957
+     * PER_NODE_CACHE_HIT_RATIO: Tree({4: 0.00728, 1: 0.00783, 3: 0.00705, 2: 0.00741})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.97043})
+    LATENCY
+     * MEAN: 100.2657
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.0271772699197035, 1.0226547543075941, 1.0093608779857972, 1.0035009548058562]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 20/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.01
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_AVOID_BUSY_NODE
+   * desc -> Alpha: 1, strategy: PROB_CACHE_AVOID_BUSY_NODE, topology: TREE, network cache: 0.01
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.06825
+     * PER_NODE_CACHE_HIT_RATIO: Tree({3: 0.01663, 1: 0.01628, 2: 0.01845, 4: 0.01689})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.93175})
+    LATENCY
+     * MEAN: 96.6245
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.0324446680080483, 1.0335829910606427, 1.0179461615154537, 1.015695067264574]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 21/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.05
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_AVOID_BUSY_NODE
+   * desc -> Alpha: 1, strategy: PROB_CACHE_AVOID_BUSY_NODE, topology: TREE, network cache: 0.05
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.31601
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.0788, 2: 0.07843, 3: 0.08066, 4: 0.07812})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.68399})
+    LATENCY
+     * MEAN: 80.82843
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.1112501303305182, 1.1048899237933953, 1.0969591481519403, 1.1037934668071654]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 22/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.1
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_AVOID_BUSY_NODE
+   * desc -> Alpha: 1, strategy: PROB_CACHE_AVOID_BUSY_NODE, topology: TREE, network cache: 0.1
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.42161
+     * PER_NODE_CACHE_HIT_RATIO: Tree({2: 0.10545, 1: 0.10477, 3: 0.10525, 4: 0.10614})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.57839})
+    LATENCY
+     * MEAN: 79.42013
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.187063672302128, 1.2063982626127632, 1.1914947156517364, 1.1678886852191301]
+     * PERCENTAGE_OF_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 23/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.3
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_AVOID_BUSY_NODE
+   * desc -> Alpha: 1, strategy: PROB_CACHE_AVOID_BUSY_NODE, topology: TREE, network cache: 0.3
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.5981360745570177
+     * PER_NODE_CACHE_HIT_RATIO: Tree({1: 0.15048398064077437, 4: 0.14890404383824646, 3: 0.1501339946402144, 2: 0.1486140554377825})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.4018639254429823})
+    LATENCY
+     * MEAN: 93.23107
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.495482494666834, 1.4690377897745317, 1.5367826904985888, 1.4833270178097764]
+     * PERCENTAGE_OF_REJECTION: [0, 6.273919317397578e-05, 0.0, 0.00018811136192626034, 0.0]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 6.644959797993223e-05, 0.0, 0.00019981350739309978, 0.0]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+EXPERIMENT 24/24:
+  CONFIGURATION:
+   * workload -> name: STATIONARY_PACKET_LEVEL_CACHE_DELAY, n_contents: 1000, n_warmup: 100000, n_measured: 100000, rate: 0.04, alpha: 1, read_delay_penalty: 100, write_delay_penalty: 100, cache_queue_size: 10
+   * cache_placement -> name: UNIFORM, network_cache: 0.5
+   * content_placement -> name: UNIFORM
+   * cache_policy -> name: LRU
+   * topology -> name: TREE, k: 4, h: 2
+   * strategy -> name: PROB_CACHE_AVOID_BUSY_NODE
+   * desc -> Alpha: 1, strategy: PROB_CACHE_AVOID_BUSY_NODE, topology: TREE, network cache: 0.5
+  RESULTS:
+    CACHE_HIT_RATIO
+     * MEAN: 0.6730459649438562
+     * PER_NODE_CACHE_HIT_RATIO: Tree({2: 0.1676115627280999, 1: 0.16715161332253453, 3: 0.17101118876923538, 4: 0.16727160012398637})
+     * PER_NODE_SERVER_HIT_RATIO: Tree({0: 0.32695403505614384})
+    LATENCY
+     * MEAN: 111.7837
+    CACHE_QUEUE
+     * AVERAGE_QUEUE_SIZE: [0, 1.7095609308724062, 1.773646519621885, 1.788143665602062, 1.7474978553045468]
+     * PERCENTAGE_OF_REJECTION: [0, 5.7316444087808795e-05, 0.00017184098980410127, 0.00011205109529945655, 0.0002858776443682104]
+     * PERCENTAGE_OF_REQUEST_REJECTION: [0, 5.9819345576359396e-05, 0.0001789655789536479, 0.00011693854879260948, 0.00029888218064439]
+     * PERCENTAGE_OF_DATA_REJECTION: [0, 0.0, 0.0, 0.0, 0.0]
+
+

@@ -956,8 +956,14 @@ class CacheQueueCollector(DataCollector):
             data = self.rejected_data[node] + self.admitted_data[node]
             
             self.percentage_of_rejection[node] = rejected / (admitted + rejected)
-            self.percentage_of_request_rejection[node] = self.rejected_request[node] / request
-            self.percentage_of_data_rejection[node] = self.rejected_data[node] / data
+            if request != 0:
+                self.percentage_of_request_rejection[node] = self.rejected_request[node] / request
+            else:
+                self.percentage_of_request_rejection[node] = None
+            if data != 0:
+                self.percentage_of_data_rejection[node] = self.rejected_data[node] / data
+            else:
+                self.percentage_of_data_rejection[node] = None
 
         # average queue length per node
         for node in self.cache_queue_size_when_data:

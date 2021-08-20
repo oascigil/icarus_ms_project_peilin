@@ -284,9 +284,9 @@ class StationaryPacketLevelWorkloadWithCacheDelay(object):
             else:
                 receiver = self.receivers[self.receiver_dist.rv() - 1]
             content = int(self.zipf.rv())
-            if flow_counter % 1000 == 0:
-                random.shuffle(self.contents)
-            content = self.contents.index(content) + 1
+            # if flow_counter % 1000 == 0:
+              #   random.shuffle(self.contents)
+            # content = self.contents.index(content) + 1
             log = (flow_counter >= self.n_warmup)
             event = {'receiver': receiver, 'content': content, 'node': receiver, 'flow': flow_counter, 'pkt_type': 'Request', 'log': log}
             # print('flow counter: ', flow_counter, 't_next_flow', t_next_flow, 'event:', event)

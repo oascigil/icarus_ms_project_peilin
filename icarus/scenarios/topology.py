@@ -140,6 +140,7 @@ def topology_tree(k, h, delay=1, delay_ext=100, **kwargs):
     routers = [v for v in topology.nodes()
               if topology.node[v]['depth'] > 0
               and topology.node[v]['depth'] < h]
+    print('Number of routers: ', len(routers))
     topology.graph['icr_candidates'] = set(routers)
     for v in sources:
         fnss.add_stack(topology, v, 'source')
