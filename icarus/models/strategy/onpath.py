@@ -1153,9 +1153,10 @@ class ProbCachePacketLevelAvoidBusyNode(Strategy):
     """
 
     @inheritdoc(Strategy)
-    def __init__(self, view, controller, t_tw=10):
+    def __init__(self, view, controller, t_tw=2, a=1):
         super(ProbCachePacketLevelAvoidBusyNode, self).__init__(view, controller)
         self.t_tw = t_tw
+        self.a = a
         self.cache_size = view.cache_nodes(size=True)
 
     @inheritdoc(Strategy)
@@ -1172,7 +1173,7 @@ class ProbCachePacketLevelAvoidBusyNode(Strategy):
                     and self.controller.get_content_flow(node, content, flow, log):
                 if node in self.cache_size:
                     self.controller.add_probcache_c(flow)
-                    self.controller.add_probcache_N(flow, self.view.get_cache_queue_size())
+                    self.controller.add_probcache_N(flow, self.cache_size[node])
                     # path = self.view.shortest_path(node, receiver)
                 if node == source:
                     path = self.view.shortest_path(node, receiver)
@@ -1203,7 +1204,7 @@ class ProbCachePacketLevelAvoidBusyNode(Strategy):
             t_event = time + delay
             if node in self.cache_size:
                 self.controller.add_probcache_c(flow)
-                self.controller.add_probcache_N(flow, self.view.get_cache_queue_size())
+                self.controller.add_probcache_N(flow, self.cache_size[node])
             self.controller.forward_request_hop_flow(node, path[1], flow, log)
             self.controller.add_event({'t_event': t_event, 'receiver': receiver,
                                        'content': content, 'node': path[1], 'flow': flow,
@@ -1222,12 +1223,18 @@ class ProbCachePacketLevelAvoidBusyNode(Strategy):
                     N = self.view.get_probcache_N(flow)
                     x = self.view.get_probcache_x(flow)
                     c = self.view.get_probcache_c(flow)
-                    queue_size = len(self.view.cacheQ_node(node))
-                    # c_node = self.view.get_cahce_queue_size()
-                    if queue_size == 0:
-                        queue_size = 1
-                    prob_cache = float(N) / (self.t_tw * queue_size * self.view.get_cache_queue_size()) * (x / c) # ** c
+                    queue_size_node = len(self.view.cacheQ_node(node))
+                    if queue_size_node == 0:
+                        queue_size_node = 1
+                    inverse_queue_size_node = 1 / queue_size_node
+                    sum_inverse_queue_size = 1
+                    for queue in self.view.cacheQ():
+                        queue_size = len(self.view.cacheQ_node(queue))
+                        if queue_size == 0:
+                            queue_size = 1
+                        sum_inverse_queue_size += 1 / queue_size
                     i = random.random()
+                    prob_cache = float(N) / (self.t_tw * self.cache_size[node]) * ((((c - x) / c) * inverse_queue_size_node / sum_inverse_queue_size) ** x) * ((x / c) ** (c - x))
                     if i < prob_cache and len(self.view.cacheQ_node(node)) < self.view.get_cache_queue_size() \
                             and (node not in self.view.track_busy_node(flow)):
                         queue_delay = self.view.get_cache_queue_delay(node, time)
@@ -1239,13 +1246,13 @@ class ProbCachePacketLevelAvoidBusyNode(Strategy):
                         self.controller.report_cache_queue_size(node, pkt_type, log)
                         self.controller.record_pkt_admitted(node, pkt_type, log)
                         if path_to_source[1] in self.cache_size:
-                            self.controller.subtract_probcache_N(flow, self.view.get_cache_queue_size())
+                            self.controller.subtract_probcache_N(flow, self.cache_size[path_to_source[1]])
                         return
                     elif i < prob_cache \
                             and (len(self.view.cacheQ_node(node)) >= self.view.get_cache_queue_size() or node in self.view.track_busy_node(flow)):
                         self.controller.record_pkt_rejected(node, pkt_type, log)
                 if path_to_source[1] in self.cache_size:
-                    self.controller.subtract_probcache_N(flow, self.view.get_cache_queue_size())
+                    self.controller.subtract_probcache_N(flow, self.cache_size[path_to_source[1]])
                 delay = self.view.link_delay(node, path[1])
                 t_event = time + delay
                 self.controller.forward_content_hop_flow(node, path[1], flow, log)

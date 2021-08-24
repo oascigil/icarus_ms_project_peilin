@@ -49,11 +49,11 @@ DATA_COLLECTORS = ['CACHE_HIT_RATIO', 'LATENCY', 'CACHE_QUEUE']
 # example I wanted to filter experiment with alpha=0.8, experiments with
 # alpha = 0.799999999999 would not be recognized
 ALPHA = [0.01, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 1.4]
-# ALPHA = [0.1]
+# ALPHA = [1]
 
 # Total size of network cache as a fraction of content population
-# NETWORK_CACHE = [0.004, 0.01, 0.05, 0.1, 0.3, 0.5]
-NETWORK_CACHE = [0.1]
+NETWORK_CACHE = [0.004, 0.01, 0.05, 0.1, 0.3, 0.5]
+# NETWORK_CACHE = [0.1]
 
 # Number of content objects
 N_CONTENTS = 10 ** 3
@@ -65,7 +65,7 @@ NETWORK_REQUEST_RATE = 0.04
 
 # Number of content requests generated to prepopulate the caches
 # These requests are not logged
-N_WARMUP_REQUESTS = 5 * 10 ** 4
+N_WARMUP_REQUESTS = 10 ** 5
 
 # Number of content requests generated after the warmup and logged
 # to generate results.
@@ -97,8 +97,8 @@ STRATEGIES2= [
         'LCE_PL_CD',
         'LCD_PL_CD',
         'PROB_CACHE_AVOID_BUSY_NODE',
-        'LCE_AVOID_BUSY_NODE',
-        'LCD_AVOID_BUSY_NODE'
+        # 'LCE_AVOID_BUSY_NODE',
+        # 'LCD_AVOID_BUSY_NODE'
         ]
 
 STRATEGIES = STRATEGIES1 + STRATEGIES2
@@ -124,14 +124,14 @@ default['content_placement']['name'] = 'UNIFORM'
 default['cache_policy']['name'] = CACHE_POLICY
 
 # Set topology
-default['topology']['name'] = 'TREE'
-default['topology']['k'] = 4
-default['topology']['h'] = 2
+default['topology']['name'] = 'PATH'
+default['topology']['n'] = 6
+# default['topology']['h'] = 2
 # default['topology']['delay'] = 1
 # List of all implemented topologies
 # Topology implementations are located in ./icarus/scenarios/topology.py
 TOPOLOGIES = [
-        'TREE'
+        'PATH'
               ]
 
 # Create experiments multiplexing all desired parameters

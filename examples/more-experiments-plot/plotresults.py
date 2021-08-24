@@ -42,6 +42,9 @@ PLOT_EMPTY_GRAPHS = True
 # On-path strategies: dashed lines
 # No-cache: dotted line
 STRATEGY_STYLE = {
+         'LCE_PKT_LEVEL':             'k--o',
+         'LCD_PKT_LEVEL':             'r--v',
+         'PROB_CACHE_PKT_lEVEL':      'c--s',
          'LCE_AVOID_BUSY_NODE':             'k--o',
          'LCD_AVOID_BUSY_NODE':             'r--v',
          'PROB_CACHE_AVOID_BUSY_NODE':      'c--s',
@@ -52,6 +55,9 @@ STRATEGY_STYLE = {
 
 # This dict maps name of strategies to names to be displayed in the legend
 STRATEGY_LEGEND = {
+         'LCE_PKT_LEVEL':             'LCE packet level',
+         'LCD_PKT_LEVEL':             'LCD packet level',
+         'PROB_CACHE_PKT_LEVEL':      'ProbCache packet level',
          'LCE_AVOID_BUSY_NODE':             'LCE packet level avoid busy node',
          'LCD_AVOID_BUSY_NODE':             'LCD packet level avoid busy node',
          'PROB_CACHE_AVOID_BUSY_NODE':      'ProbCache packet level avoid busy node',
@@ -62,6 +68,9 @@ STRATEGY_LEGEND = {
 
 # Color and hatch styles for bar charts of cache hit ratio and link load vs topology
 STRATEGY_BAR_COLOR = {
+    'LCE_PKT_LEVEL':            '0.1',
+    'LCD_PKT_LEVEL':            '0.3',
+    'PROB_CACHE_PKT_LEVEL':     '0.5', 
     'LCE_AVOID_BUSY_NODE':            'k',
     'LCD_AVOID_BUSY_NODE':            '0.2',
     'PROB_AVOID_BUSY_NODE':           '0.4',
@@ -71,9 +80,12 @@ STRATEGY_BAR_COLOR = {
     }
 
 STRATEGY_BAR_HATCH = {
-    'LCE_AVOID_BUSY_NODE':              None,
+    'LCE_PKT_LEVEL':              'o',
+    'LCD_PKT_LEVEL':              '//',
+    'PROB_CACHE_PKT_LEVEL':       '+',
+    'LCE_AVOID_BUSY_NODE':              'o',
     'LCD_AVOID_BUSY_NODE':              '//',
-    'PROB_CACHE_AVOID_BUSY_NODE':       'x',
+    'PROB_CACHE_AVOID_BUSY_NODE':       None,
     'LCE_PL_CD':                  'o',
     'LCD_PL_CD':                  '//',
     'PROB_CACHE_PL_CD':           '+'
@@ -121,7 +133,7 @@ def plot_cache_hits_vs_cache_size(resultset, topology, alpha, cache_size_range, 
     desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
     desc['ycondvals'] = strategies
     desc['errorbar'] = True
-    desc['legend_loc'] = 'upper left'
+    desc['legend_loc'] = 'lower right'
     desc['line_style'] = STRATEGY_STYLE
     desc['legend'] = STRATEGY_LEGEND
     desc['plotempty'] = PLOT_EMPTY_GRAPHS
@@ -142,7 +154,7 @@ def plot_latency_vs_alpha(resultset, topology, cache_size, alpha_range, strategi
     desc['ycondnames'] = [('strategy', 'name')] * len(strategies)
     desc['ycondvals'] = strategies
     desc['errorbar'] = True
-    desc['legend_loc'] = 'upper right'
+    desc['legend_loc'] = 'center left'
     desc['line_style'] = STRATEGY_STYLE
     desc['legend'] = STRATEGY_LEGEND
     desc['plotempty'] = PLOT_EMPTY_GRAPHS
@@ -165,7 +177,7 @@ def plot_latency_vs_cache_size(resultset, topology, alpha, cache_size_range, str
     desc['ycondvals'] = strategies
     # desc['metric'] = ('LATENCY', 'MEAN')
     desc['errorbar'] = True
-    desc['legend_loc'] = 'upper right'
+    desc['legend_loc'] = 'center left'
     desc['line_style'] = STRATEGY_STYLE
     desc['legend'] = STRATEGY_LEGEND
     desc['plotempty'] = PLOT_EMPTY_GRAPHS
@@ -406,13 +418,14 @@ def run(config, results, plotdir):
                 plot_percentage_of_data_rejection(resultset, topology, alpha, cache_size, n, strategies, plotdir)
                 logger.info('Plotting average cache queue size')
                 plot_cache_queue_size(resultset, topology, alpha, cache_size, n, strategies, plotdir)
-    """
+    
     for cache_size in cache_sizes:
         for alpha in alphas:
             logger.info('Plotting cache hit ratio for cache size %s vs alpha %s against topologies' % (str(cache_size), str(alpha)))
             plot_cache_hits_vs_topology(resultset, alpha, cache_size, topologies, strategies, plotdir)
             # logger.info('Plotting link load for cache size %s vs alpha %s against topologies' % (str(cache_size), str(alpha)))
             # plot_link_load_vs_topology(resultset, alpha, cache_size, topologies, strategies, plotdir)
+    """
     logger.info('Exit. Plots were saved in directory %s' % os.path.abspath(plotdir))
 
 
